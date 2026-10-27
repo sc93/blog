@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
+  metadataBase: new URL(siteConfig.url),
   description: siteConfig.description,
   alternates: {
     types: {
       'application/rss+xml': [
         {
           url: '/rss.xml',
-          title: 'next-minimal-blog RSS Feed',
+          title: `${siteConfig.name} RSS`,
         },
       ],
     },
@@ -33,31 +33,30 @@ export const metadata: Metadata = {
   keywords: ['Next.js', 'React', 'Tailwind CSS', 'shadcn-ui', 'MDX'],
   openGraph: {
     type: 'website',
-    locale: 'ja_JP',
-    url: process.env.NEXT_PUBLIC_APP_URL!,
+    locale: 'ko_KR',
+    url: siteConfig.url,
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
+    images: [siteConfig.ogImage],
   },
   twitter: {
     card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
-    creator: '@cakegaly',
+    images: [siteConfig.ogImage],
   },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
     apple: '/apple-touch-icon.png',
   },
-  manifest: `${process.env.NEXT_PUBLIC_APP_URL}/site.webmanifest`,
+  manifest: `${siteConfig.url}/site.webmanifest`,
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="ja" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <head />
       <body
         className={cn(

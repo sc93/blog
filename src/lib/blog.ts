@@ -1,10 +1,8 @@
 import type { BrandIcons } from '@/components/shared/brand-icons';
 
 export const author = {
-  slug: 'cakegaly',
-  name: 'cakegaly',
-  image: '/images/avatars/cakegaly.webp',
-  twitter: 'cakegaly',
+  name: 'sc93',
+  url: 'https://github.com/sc93',
 };
 
 export const tags: Record<

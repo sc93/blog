@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 
-import { author, tags } from '@/lib/blog';
+import { author } from '@/lib/blog';
 import { siteConfig } from '@/lib/config';
+import { categories } from '@/lib/content';
 import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx';
 import { absoluteUrl, formatDate } from '@/lib/utils';
 import { ArticleShareButtons } from '@/components/content/article-share-buttons';
@@ -37,10 +38,17 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   return {
     title: post.metadata.title,
     description: post.metadata.description,
+    alternates: { canonical: absoluteUrl(`/blog/${post.slug}`) },
+    robots: post.metadata.published
+      ? undefined
+      : { index: false, follow: false },
     openGraph: {
       title: post.metadata.title,
       description: post.metadata.description,
       type: 'article',
+      publishedTime: `${post.metadata.date}T00:00:00+09:00`,
+      section: categories[post.metadata.category].name,
+      tags: post.metadata.tags,
       url: absoluteUrl(`/blog/${post.slug}`),
       images: [
         {
@@ -73,7 +81,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       ? [
           {
             link: `/blog?tag=${encodeURIComponent(post.metadata.tags[0])}`,
-            label: tags[post.metadata.tags[0]].name,
+            label: post.metadata.tags[0],
           },
         ]
       : []),
@@ -115,12 +123,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       </time>
                     </div>
                   )}
-                  <div className="hidden md:flex md:gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <LinkBadge
+                      link={`/blog?category=${post.metadata.category}`}
+                      label={categories[post.metadata.category].name}
+                    />
+                    {!post.metadata.published && (
+                      <span>초안 · 개발 환경에서만 표시</span>
+                    )}
                     {post.metadata.tags?.map((slug) => (
                       <LinkBadge
                         key={slug}
                         link={`/blog?tag=${encodeURIComponent(slug)}`}
-                        label={tags[slug].name}
+                        label={slug}
                       />
                     ))}
                   </div>
@@ -132,11 +147,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </h1>
 
                 <div className="py-4">
-                  <Author
-                    name={author.name}
-                    twitterId={author.twitter}
-                    imageUrl={author.image}
-                  />
+                  <Author name={author.name} href={author.url} />
                 </div>
               </header>
 

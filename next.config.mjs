@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  outputFileTracingIncludes: {
+    '/blog': ['./src/content/blog/*.mdx'],
+  },
   typescript: {
     tsconfigPath: 'tsconfig.build.json',
   },

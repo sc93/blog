@@ -1,14 +1,16 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { siteConfig } from '@/lib/config';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function formatDate(input: string | number): string {
   const date = new Date(input);
-  return date.toLocaleDateString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
+  return date.toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
@@ -16,7 +18,7 @@ export function formatDate(input: string | number): string {
 }
 
 export function absoluteUrl(path: string): string {
-  return `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
+  return new URL(path, siteConfig.url).toString();
 }
 
 export function truncateText(inputText: string, maxLength: number): string {
