@@ -49,7 +49,7 @@ test('excludes drafts from production and exposes them only in development', asy
     ]) {
       await writeFile(
         path.join(dir, `${slug}.mdx`),
-        `---\ntitle: ${slug}\ndescription: description\ndate: "2026-10-27"\ncategory: til\ntags: [React]\npublished: ${published}\n---\n# Content`
+        `---\ntitle: ${slug}\ndescription: description\ndate: "2026-10-27"\ncategory: english\ntags: [React]\npublished: ${published}\n---\n# Content`
       );
     }
     assert.deepEqual(

@@ -6,7 +6,8 @@ import { siteConfig } from '@/lib/config';
 import { categories } from '@/lib/content';
 import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx';
 import { absoluteUrl, formatDate } from '@/lib/utils';
-import { ArticleShareButtons } from '@/components/content/article-share-buttons';
+import { Button } from '@/components/shadcn-ui/button';
+// import { ArticleShareButtons } from '@/components/content/article-share-buttons';
 import { Author } from '@/components/content/author';
 import { CustomMDX } from '@/components/content/custom-mdx';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
@@ -158,23 +159,23 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
 
               {/* Share Buttons */}
-              <div className="py-4">
+              {/* <div className="py-4">
                 <ArticleShareButtons
                   url={absoluteUrl(`/blog/${slug}`)}
                   title={post.metadata.title}
                   description={post.metadata.description}
                   image={thumbnailUrl}
                 />
-              </div>
+              </div> */}
             </article>
           </section>
         </div>
       </div>
       <div className="container-wrapper">
-        <div className="container py-6">
-          <Link href="/blog" className="text-sm underline underline-offset-4">
-            ← 전체 글로 돌아가기
-          </Link>
+        <div className="container flex justify-center py-6">
+          <Button asChild variant="link" size="sm">
+            <Link href="/blog">전체 글로 돌아가기</Link>
+          </Button>
         </div>
       </div>
     </div>

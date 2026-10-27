@@ -4,11 +4,10 @@ import matter from 'gray-matter';
 
 export const categories = {
   development: {
-    name: 'Development',
+    name: '개발',
     description: '개발 기술과 문제 해결 기록',
   },
-  english: { name: 'English', description: '영어 단어, 표현과 문법' },
-  til: { name: 'TIL', description: '하루의 짧은 학습 기록' },
+  english: { name: '영어', description: '영어 단어, 표현과 문법' },
 } as const;
 
 export type Category = keyof typeof categories;

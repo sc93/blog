@@ -1,6 +1,6 @@
 # sc93 학습 노트
 
-개발, 영어, TIL을 꾸준히 기록하는 개인 학습 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
+개발과 영어를 꾸준히 기록하는 개인 학습 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
 
 ## 기술 스택
 
@@ -71,7 +71,7 @@ published: false
 | `title`       | 비어 있지 않은 글 제목                         |
 | `description` | 글 설명. 초안은 빈 문자열 허용, 공개 시 필수   |
 | `date`        | 따옴표로 감싼 `YYYY-MM-DD` 형식의 실제 날짜    |
-| `category`    | `development`, `english`, `til` 중 하나        |
+| `category`    | `development`, `english` 중 하나               |
 | `tags`        | 문자열 배열. 빈 배열 가능, 공백·중복 태그 불가 |
 | `published`   | boolean. 공개하려면 `true`로 변경              |
 | `thumbnail`   | 선택 사항. `/images/...` 형식의 이미지 경로 등 |
@@ -86,9 +86,8 @@ published: false
 
 카테고리는 `src/lib/content.ts`의 `categories` 한 곳에서 정의합니다.
 
-- Development: 개발 기술과 문제 해결 기록
-- English: 영어 단어, 표현과 문법
-- TIL: 하루의 짧은 학습 기록
+- 개발: 개발 기술과 문제 해결 기록
+- 영어: 영어 단어, 표현과 문법
 
 태그는 Frontmatter에서 자유롭게 추가할 수 있고 공개 글에서 자동 수집합니다. 미리 아이콘을 등록할 필요는 없습니다. 기존 기술 태그의 이름과 아이콘 설정은 `src/lib/blog.ts`에서 재사용합니다. 태그는 대소문자를 구분합니다.
 

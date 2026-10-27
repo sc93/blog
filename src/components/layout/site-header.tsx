@@ -24,9 +24,6 @@ export function SiteHeader() {
             </Link>
           </Button>
           <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/blog">전체 글</Link>
-            </Button>
             <Button
               asChild
               size="sm"

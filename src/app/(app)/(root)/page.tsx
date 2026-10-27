@@ -10,7 +10,7 @@ export const revalidate = false;
 
 export const metadata: Metadata = {
   title: '학습 기록',
-  description: '개발, 영어, TIL을 꾸준히 기록합니다.',
+  description: '개발과 영어를 꾸준히 기록합니다.',
   alternates: { canonical: '/' },
 };
 
