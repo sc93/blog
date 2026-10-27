@@ -149,7 +149,14 @@ chore: 개발 환경 설정 정리
 
 검증 후 작업 브랜치를 푸시하고 main 대상 PR을 만듭니다. PR 제목도 같은 형식을 사용하고, 본문에 변경 이유·작업 내용·검증 결과를 한국어로 작성합니다. 글 작업에는 공개 여부를 포함합니다. PR 생성 후 코드·콘텐츠 리뷰 결과를 PR에 남기고, 상세 리뷰 지침이 제공되면 해당 지침을 적용합니다. 병합은 사용자의 명시적인 요청이 있을 때 진행합니다.
 
-Codex가 따를 구체적인 작업 절차는 `AGENTS.md`, PR 작성 양식은 `.github/PULL_REQUEST_TEMPLATE.md`에 있습니다.
+AI 지침의 진입점은 [AGENTS.md](AGENTS.md)입니다. 상세 지침은 적용 범위별로 분리합니다.
+
+- [Git 작업 절차](docs/ai/git-workflow.md): 브랜치·커밋·푸시·PR
+- [코드 리뷰 지침](docs/ai/code-review.md): 리뷰와 결과 기록, 추후 상세 지침
+- [검증 지침](docs/ai/verification.md): 변경 종류별 검사
+- [콘텐츠 지침](src/content/AGENTS.md): 글 메타데이터와 공개 규칙
+
+PR 작성 양식은 [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)에 있습니다.
 
 ## 라이선스와 출처
 
