@@ -1,16 +1,12 @@
-export const SiteLogo = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 256 256"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="16"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M32 192L96 96L160 192L224 96" />
-    </svg>
-  );
-};
+import Image from 'next/image';
+
+export const SiteLogo = ({ className }: { className?: string }) => (
+  <Image
+    src="/images/sc-logo.webp"
+    alt="SC 로고"
+    width={440}
+    height={268}
+    className={className}
+    priority
+  />
+);
