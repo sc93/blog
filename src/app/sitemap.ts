@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
 
-import { tags } from '@/lib/blog';
 import { siteConfig } from '@/lib/config';
 import { getAllBlogPosts } from '@/lib/mdx';
 
@@ -12,15 +11,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/blog/${post.slug}`,
   }));
 
-  const tagPages = Object.keys(tags).map((slug) => ({
-    url: `${baseUrl}/tag/${slug}`,
-  }));
-
   const staticPages = [
     {
       url: baseUrl,
     },
+    {
+      url: `${baseUrl}/blog`,
+    },
   ];
 
-  return [...staticPages, ...blogPages, ...tagPages];
+  return [...staticPages, ...blogPages];
 }

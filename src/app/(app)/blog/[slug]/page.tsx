@@ -72,7 +72,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     ...(post.metadata.tags && post.metadata.tags.length > 0
       ? [
           {
-            link: `/tag/${post.metadata.tags[0]}`,
+            link: `/blog?tag=${encodeURIComponent(post.metadata.tags[0])}`,
             label: tags[post.metadata.tags[0]].name,
           },
         ]
@@ -119,7 +119,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     {post.metadata.tags?.map((slug) => (
                       <LinkBadge
                         key={slug}
-                        link={`/tag/${slug}`}
+                        link={`/blog?tag=${encodeURIComponent(slug)}`}
                         label={tags[slug].name}
                       />
                     ))}
