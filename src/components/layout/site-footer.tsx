@@ -23,7 +23,7 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
               rel="noreferrer"
               className={buttonVariants({ variant: 'outline', size: 'icon' })}
               aria-label="X(Twitter)"
-              title="X(Twitter, @cakegaly)"
+              title="X(Twitter)"
             >
               <BrandIcons.x className="size-4" />
             </Link>
@@ -35,7 +35,7 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
               target="_blank"
               rel="noreferrer"
               aria-label="Email"
-              title="Email (next-minimal-blog -at- example -dot- com)"
+              title={siteConfig.email}
             >
               <MailIcon className="size-4" />
             </Link>
@@ -47,7 +47,7 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"
-              title="GitHub (next-minimal-blog github repository)"
+              title="GitHub 저장소"
             >
               <BrandIcons.gitHub className="size-4" />
             </Link>
@@ -56,7 +56,7 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
             href="/rss.xml"
             className={buttonVariants({ variant: 'outline', size: 'icon' })}
             aria-label="RSS"
-            title="RSS Feed (cakegaly -dot- com)"
+            title={`${siteConfig.name} RSS`}
           >
             <RssIcon className="size-4" />
           </Link>
