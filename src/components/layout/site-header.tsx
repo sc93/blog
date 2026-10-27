@@ -10,7 +10,7 @@ import { SiteLogo } from '@/components/shared/site-logo';
 export function SiteHeader() {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
-      <div className="container-wrapper px-6">
+      <div className="container-wrapper">
         <div className="container flex h-12 items-center gap-2 border-b **:data-[slot=separator]:!h-4 md:h-16">
           <Button
             asChild
@@ -31,7 +31,7 @@ export function SiteHeader() {
               asChild
               size="sm"
               variant="ghost"
-              className="h-8 shadow-none"
+              className="hidden h-8 shadow-none sm:inline-flex"
             >
               <Link
                 href={siteConfig.links.github}
