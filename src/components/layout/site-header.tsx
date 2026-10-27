@@ -20,7 +20,7 @@ export function SiteHeader() {
           >
             <Link href="/">
               <SiteLogo className="h-7 w-auto" />
-              <span className="text-sm font-semibold">{siteConfig.name}</span>
+              <span className="text-sm font-semibold">93 blog</span>
             </Link>
           </Button>
           <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
