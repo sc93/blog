@@ -29,6 +29,9 @@ export const metadata: Metadata = {
       ],
     },
   },
+  verification: {
+    google: 'ue78CbeXcl6e4sD4T89kUvzLHlehItKYoS6-8POFXyw',
+  },
   keywords: ['Next.js', 'React', 'Tailwind CSS', 'shadcn-ui', 'MDX'],
   openGraph: {
     type: 'website',
