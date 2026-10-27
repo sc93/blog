@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronRightIcon } from 'lucide-react';
 
-import { tags } from '@/lib/blog';
+import { getTags } from '@/lib/blog';
 import { getAllBlogPosts } from '@/lib/mdx';
 import { cn, formatDate } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/shadcn-ui/button';
@@ -12,9 +12,8 @@ import { LinkCard } from '@/components/shared/link-card';
 import { PartialViewCarousel } from '@/components/shared/partial-view-carousel';
 import { ViewpointIndicator } from '@/components/shared/viewpoint-indicator';
 
-const title = 'Lightweight and Minimalistic Next.js Blog Template';
-const description =
-  'A minimalistic, easy-to-use blog template built with Next.js. Customize it to your liking and use it for personal blogs, portfolio sites, or tech documentation.';
+const title = '학습 기록';
+const description = '개발, 영어, TIL을 꾸준히 기록합니다.';
 
 export const dynamic = 'force-static';
 export const revalidate = false;
@@ -22,10 +21,12 @@ export const revalidate = false;
 export const metadata: Metadata = {
   title,
   description,
+  alternates: { canonical: '/' },
 };
 
 export default async function IndexPage() {
   const allPosts = await getAllBlogPosts();
+  const tags = getTags(allPosts);
 
   return (
     <div className="flex flex-1 flex-col">

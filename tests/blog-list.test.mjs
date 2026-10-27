@@ -36,3 +36,22 @@ test('builds query links, resets to first page and encodes tags', () => {
   assert.equal(getBlogListHref(2, 'mdx'), '/blog?page=2&tag=mdx');
   assert.equal(getBlogListHref(1, 'C++'), '/blog?tag=C%2B%2B');
 });
+
+test('combines category and tag filters and preserves both in links', () => {
+  const items = [
+    { metadata: { category: 'english', tags: ['React'] } },
+    { metadata: { category: 'development', tags: ['React'] } },
+  ];
+  assert.equal(
+    selectBlogPage(items, { category: 'english', tag: 'React' })?.totalItems,
+    1
+  );
+  assert.equal(
+    selectBlogPage(items, { category: ['english', 'til'] }),
+    undefined
+  );
+  assert.equal(
+    getBlogListHref(2, 'React', 'english'),
+    '/blog?page=2&tag=React&category=english'
+  );
+});

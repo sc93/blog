@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
-import { tags } from '@/lib/blog';
+import { getTags } from '@/lib/blog';
 import {
   getBlogListHref,
   selectBlogPage,
   type BlogListQuery,
 } from '@/lib/blog-list';
 import { siteConfig } from '@/lib/config';
+import { categories } from '@/lib/content';
 import { getAllBlogPosts } from '@/lib/mdx';
 import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
@@ -29,11 +30,19 @@ export async function generateMetadata({
   searchParams,
 }: BlogPageProps): Promise<Metadata> {
   const query = await searchParams;
+  const posts = await getAllBlogPosts();
+  const tags = getTags(posts);
   const tag =
     typeof query.tag === 'string' && Object.hasOwn(tags, query.tag)
       ? tags[query.tag]
       : undefined;
-  const title = tag ? `${tag.name} 글 목록` : '전체 글';
+  const category =
+    typeof query.category === 'string' &&
+    Object.hasOwn(categories, query.category)
+      ? categories[query.category as keyof typeof categories]
+      : undefined;
+  const title =
+    [category?.name, tag?.name].filter(Boolean).join(' · ') || '전체 글';
   const description = tag
     ? `${tag.name} 태그의 학습 기록을 모았습니다.`
     : '개발과 일상의 학습 기록을 모았습니다.';
@@ -41,7 +50,11 @@ export async function generateMetadata({
     typeof query.page === 'string' && /^[1-9]\d*$/.test(query.page)
       ? Number(query.page)
       : 1,
-    tag ? (query.tag as string) : undefined
+    tag ? (query.tag as string) : undefined,
+    typeof query.category === 'string' &&
+      Object.hasOwn(categories, query.category)
+      ? query.category
+      : undefined
   );
   return {
     title,
@@ -65,15 +78,25 @@ export async function generateMetadata({
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const query = await searchParams;
+  const posts = await getAllBlogPosts();
+  const tags = getTags(posts);
   if (
     query.tag !== undefined &&
     (typeof query.tag !== 'string' || !Object.hasOwn(tags, query.tag))
   ) {
     notFound();
   }
+  if (
+    query.category !== undefined &&
+    (typeof query.category !== 'string' ||
+      !Object.hasOwn(categories, query.category))
+  )
+    notFound();
+  const selectedCategory =
+    typeof query.category === 'string' ? query.category : undefined;
   const selectedTag = typeof query.tag === 'string' ? query.tag : undefined;
   const tag = selectedTag ? tags[selectedTag] : undefined;
-  const result = selectBlogPage(await getAllBlogPosts(), query);
+  const result = selectBlogPage(posts, query);
   if (!result) notFound();
   const Icon = tag ? BrandIcons[tag.icon] : BookOpenIcon;
 
@@ -113,7 +136,15 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   </span>
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight">
-                  {tag?.name ?? '전체 글'}
+                  {[
+                    selectedCategory
+                      ? categories[selectedCategory as keyof typeof categories]
+                          .name
+                      : undefined,
+                    tag?.name,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ') || '전체 글'}
                 </h1>
                 <p className="text-muted-foreground mt-1">
                   {tag
@@ -123,6 +154,33 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
             </div>
           </header>
+          <nav aria-label="카테고리 필터" className="mt-6 flex flex-wrap gap-2">
+            {[
+              { slug: undefined, name: '모든 카테고리' },
+              ...Object.entries(categories).map(([slug, value]) => ({
+                slug,
+                name: value.name,
+              })),
+            ].map((filter) => (
+              <Badge
+                key={filter.slug ?? 'all'}
+                variant={
+                  selectedCategory === filter.slug ? 'default' : 'outline'
+                }
+                className="rounded-full px-3 py-2 font-normal"
+                asChild
+              >
+                <Link
+                  href={getBlogListHref(1, selectedTag, filter.slug)}
+                  aria-current={
+                    selectedCategory === filter.slug ? 'page' : undefined
+                  }
+                >
+                  {filter.name}
+                </Link>
+              </Badge>
+            ))}
+          </nav>
           <nav aria-label="태그 필터" className="mt-6 flex flex-wrap gap-2">
             {[
               { slug: undefined, name: '전체' },
@@ -138,7 +196,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 asChild
               >
                 <Link
-                  href={getBlogListHref(1, filter.slug)}
+                  href={getBlogListHref(1, filter.slug, selectedCategory)}
                   aria-current={
                     selectedTag === filter.slug ? 'page' : undefined
                   }
@@ -155,15 +213,27 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           {result.items.length ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {result.items.map((post, index) => (
-                <LinkCard
-                  key={post.slug}
-                  title={post.metadata.title}
-                  imageUrl={post.metadata.thumbnail || '/og.png'}
-                  link={`/blog/${post.slug}`}
-                  badgeText={formatDate(post.metadata.date)}
-                  description={post.metadata.description}
-                  priority={index < 3}
-                />
+                <div key={post.slug}>
+                  <LinkCard
+                    title={post.metadata.title}
+                    imageUrl={post.metadata.thumbnail || '/og.png'}
+                    link={`/blog/${post.slug}`}
+                    badgeText={`${formatDate(post.metadata.date)} · ${categories[post.metadata.category].name}${post.metadata.published ? '' : ' · 초안'}`}
+                    description={post.metadata.description}
+                    priority={index < 3}
+                  />
+                  <div className="mt-2 flex flex-wrap gap-2 px-3">
+                    {post.metadata.tags.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={getBlogListHref(1, tag, selectedCategory)}
+                        className="text-muted-foreground text-xs underline underline-offset-4"
+                      >
+                        #{tag}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -179,7 +249,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {result.currentPage > 1 && (
               <PaginationItem>
                 <PaginationLink
-                  href={getBlogListHref(result.currentPage - 1, selectedTag)}
+                  href={getBlogListHref(
+                    result.currentPage - 1,
+                    selectedTag,
+                    selectedCategory
+                  )}
                   aria-label="이전 페이지"
                 >
                   <ChevronLeftIcon className="size-4" />
@@ -196,7 +270,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             ).map((page) => (
               <PaginationItem key={page}>
                 <PaginationLink
-                  href={getBlogListHref(page, selectedTag)}
+                  href={getBlogListHref(page, selectedTag, selectedCategory)}
                   isActive={page === result.currentPage}
                   aria-label={`${page}페이지`}
                 >
@@ -207,7 +281,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {result.currentPage < result.totalPages && (
               <PaginationItem>
                 <PaginationLink
-                  href={getBlogListHref(result.currentPage + 1, selectedTag)}
+                  href={getBlogListHref(
+                    result.currentPage + 1,
+                    selectedTag,
+                    selectedCategory
+                  )}
                   aria-label="다음 페이지"
                 >
                   <ChevronRightIcon className="size-4" />

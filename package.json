@@ -14,7 +14,11 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "clean": "rm -rf .next/ node_modules/"
+    "clean": "rm -rf .next/ node_modules/",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.mjs",
+    "new:post": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/new-post.mjs"
   },
   "packageManager": "pnpm@10.14.0",
   "dependencies": {
@@ -51,6 +55,8 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "^4",
@@ -92,6 +98,25 @@
     "plugins": [
       "@ianvs/prettier-plugin-sort-imports",
       "prettier-plugin-tailwindcss"
+    ],
+    "overrides": [
+      {
+        "files": "*.mdx",
+        "options": {
+          "importOrder": [],
+          "embeddedLanguageFormatting": "off"
+        }
+      }
     ]
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{md,mdx,json,css,mjs,yml,yaml}": "prettier --write"
   }
 }
