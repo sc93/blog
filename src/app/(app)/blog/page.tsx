@@ -12,7 +12,6 @@ import {
 import { siteConfig } from '@/lib/config';
 import { categories } from '@/lib/content';
 import { getAllBlogPosts } from '@/lib/mdx';
-import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
 import {
   Pagination,
@@ -20,9 +19,9 @@ import {
   PaginationItem,
   PaginationLink,
 } from '@/components/shadcn-ui/pagination';
+import { PostList } from '@/components/content/post-list';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
 import { BrandIcons } from '@/components/shared/brand-icons';
-import { LinkCard } from '@/components/shared/link-card';
 
 type BlogPageProps = { searchParams: Promise<BlogListQuery> };
 
@@ -119,7 +118,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       </div>
       <div className="container-wrapper">
-        <div className="container py-6">
+        <div className="container max-w-screen-md py-6">
           <header className="from-primary/5 via-primary/3 ring-primary/10 relative overflow-hidden rounded-2xl bg-gradient-to-br to-transparent p-6 ring-1">
             <div className="bg-primary/5 absolute -top-4 -right-4 h-24 w-24 rounded-full" />
             <div className="relative flex items-start gap-4">
@@ -209,38 +208,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       </div>
       <div className="container-wrapper">
-        <section aria-label="글 목록" className="container border-b py-6">
-          {result.items.length ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {result.items.map((post, index) => (
-                <div key={post.slug}>
-                  <LinkCard
-                    title={post.metadata.title}
-                    imageUrl={post.metadata.thumbnail || '/og.png'}
-                    link={`/blog/${post.slug}`}
-                    badgeText={`${formatDate(post.metadata.date)} · ${categories[post.metadata.category].name}${post.metadata.published ? '' : ' · 초안'}`}
-                    description={post.metadata.description}
-                    priority={index < 3}
-                  />
-                  <div className="mt-2 flex flex-wrap gap-2 px-3">
-                    {post.metadata.tags.map((tag) => (
-                      <Link
-                        key={tag}
-                        href={getBlogListHref(1, tag, selectedCategory)}
-                        className="text-muted-foreground text-xs underline underline-offset-4"
-                      >
-                        #{tag}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground py-12 text-center">
-              아직 등록된 글이 없습니다.
-            </p>
-          )}
+        <section
+          aria-label="글 목록"
+          className="container max-w-screen-md border-b py-6"
+        >
+          <PostList posts={result.items} selectedCategory={selectedCategory} />
         </section>
       </div>
       {result.totalPages > 1 && (

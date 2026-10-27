@@ -5,7 +5,6 @@ import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/shadcn-ui/sonner';
 import { ThemeProvider } from '@/components/layout/theme-provider';
-import { TailwindIndicator } from '@/components/shared/tailwind-indicator';
 
 import '@/styles/globals.css';
 
@@ -66,7 +65,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
         <ThemeProvider>
           {children}
-          <TailwindIndicator />
           <Toaster position="top-center" />
         </ThemeProvider>
       </body>

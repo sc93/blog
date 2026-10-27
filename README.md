@@ -1,6 +1,6 @@
 # sc93 학습 노트
 
-개발, 영어, TIL을 꾸준히 기록하는 개인 학습 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
+개발과 영어를 꾸준히 기록하는 개인 학습 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
 
 ## 기술 스택
 
@@ -71,7 +71,7 @@ published: false
 | `title`       | 비어 있지 않은 글 제목                         |
 | `description` | 글 설명. 초안은 빈 문자열 허용, 공개 시 필수   |
 | `date`        | 따옴표로 감싼 `YYYY-MM-DD` 형식의 실제 날짜    |
-| `category`    | `development`, `english`, `til` 중 하나        |
+| `category`    | `development`, `english` 중 하나               |
 | `tags`        | 문자열 배열. 빈 배열 가능, 공백·중복 태그 불가 |
 | `published`   | boolean. 공개하려면 `true`로 변경              |
 | `thumbnail`   | 선택 사항. `/images/...` 형식의 이미지 경로 등 |
@@ -80,15 +80,14 @@ published: false
 
 개발 서버에서는 초안을 목록과 상세에서 확인할 수 있습니다. 프로덕션에서는 초안을 홈·목록·태그·글 상세·RSS·Sitemap에 노출하지 않으며 상세 URL은 404가 됩니다. RSS와 Sitemap은 개발 환경에서도 공개 글만 포함합니다. 공개 글은 작성일 내림차순으로 정렬됩니다. 잘못된 메타데이터는 파일명을 포함한 오류로 알려줍니다.
 
-기존 `sample-*.mdx`는 템플릿 기능을 보여주는 데모 글입니다. 실제 운영 전에 필요에 따라 삭제하거나 `published: false`로 바꾸세요.
+템플릿의 공개 데모 글은 제거했습니다. `draft-example.mdx`는 개발 환경에서만 보이는 비공개 작성 예시이며, 실제 글은 `pnpm new:post`로 생성하세요. 첫 글을 발행하기 전에는 홈과 전체 글 목록에 빈 목록 안내가 표시됩니다.
 
 ## 카테고리와 태그
 
 카테고리는 `src/lib/content.ts`의 `categories` 한 곳에서 정의합니다.
 
-- Development: 개발 기술과 문제 해결 기록
-- English: 영어 단어, 표현과 문법
-- TIL: 하루의 짧은 학습 기록
+- 개발: 개발 기술과 문제 해결 기록
+- 영어: 영어 단어, 표현과 문법
 
 태그는 Frontmatter에서 자유롭게 추가할 수 있고 공개 글에서 자동 수집합니다. 미리 아이콘을 등록할 필요는 없습니다. 기존 기술 태그의 이름과 아이콘 설정은 `src/lib/blog.ts`에서 재사용합니다. 태그는 대소문자를 구분합니다.
 

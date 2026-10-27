@@ -46,10 +46,7 @@ test('combines category and tag filters and preserves both in links', () => {
     selectBlogPage(items, { category: 'english', tag: 'React' })?.totalItems,
     1
   );
-  assert.equal(
-    selectBlogPage(items, { category: ['english', 'til'] }),
-    undefined
-  );
+  assert.equal(selectBlogPage(items, { category: ['english'] }), undefined);
   assert.equal(
     getBlogListHref(2, 'React', 'english'),
     '/blog?page=2&tag=React&category=english'
