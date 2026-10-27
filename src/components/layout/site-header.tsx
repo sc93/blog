@@ -19,7 +19,7 @@ export function SiteHeader() {
             className="flex h-10 w-auto gap-2 px-2"
           >
             <Link href="/">
-              <SiteLogo className="size-6" />
+              <SiteLogo className="h-7 w-auto" />
               <span className="text-sm font-semibold">{siteConfig.name}</span>
             </Link>
           </Button>
