@@ -16,3 +16,7 @@ pnpm-lock.yaml
 
 # Generated files
 *.generated.*
+
+# Package caches and hook internals
+.pnpm-store/
+.husky/_/

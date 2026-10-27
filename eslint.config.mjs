@@ -17,6 +17,8 @@ const config = [
       '**/out/',
       '**/.next/',
       '**/node_modules/',
+      '**/.pnpm-store/',
+      '**/.husky/_/',
     ],
   },
 
