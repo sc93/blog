@@ -1,0 +1,151 @@
+---
+title: 'React Compiler 이해하기: 자동 메모이제이션부터 Next.js 적용까지'
+description: 'React Compiler가 줄여 주는 렌더링 비용과 적용 조건을 살펴보고, Next.js 설정과 DevTools로 최적화를 확인하는 방법을 정리합니다.'
+date: '2026-10-27'
+category: development
+tags: ['React', 'Next.js', '성능 최적화']
+published: true
+thumbnail: '/images/react-compiler-guide.webp'
+---
+
+React 컴포넌트를 작성하다 보면 `useMemo`, `useCallback`, `memo`를 어디까지 써야 할지 고민하게 된다. 계산을 캐싱해도 자식에게 전달하는 객체나 함수가 매번 새로 만들어지면 기대한 효과를 얻기 어렵다.
+
+React Compiler는 이런 수동 최적화의 부담을 줄여 주는 빌드 도구다. 노션에 정리했던 내용을 바탕으로 자동 메모이제이션의 의미, 적용 조건, Next.js 설정, 확인 방법을 살펴본다.
+
+## React Compiler가 하는 일
+
+React Compiler는 빌드할 때 컴포넌트와 훅을 분석하고, 렌더링 사이에 재사용할 수 있는 계산 결과나 JSX를 캐싱하도록 코드를 변환한다. 과거에는 React Forget이라는 이름으로 알려졌다.
+
+중요한 점은 **분석은 빌드 시점에, 캐시의 비교와 재사용은 실행 시점에 일어난다**는 것이다. 빌드할 때 모든 계산을 끝내는 도구는 아니다.
+
+[React 공식 소개](https://react.dev/learn/react-compiler/introduction)는 주요 최적화 대상으로 불필요한 연쇄 리렌더링과 렌더링 중의 비싼 계산을 설명한다. 다만 컴포넌트마다 필요한 상태 업데이트까지 없애거나, 모든 연산을 무조건 캐싱한다는 뜻은 아니다.
+
+### JavaScript를 JavaScript로 바꾸는데 왜 컴파일러일까?
+
+컴파일은 꼭 기계어로 변환하는 것만을 뜻하지 않는다. 한 언어의 코드를 같은 언어의 다른 코드로 변환하는 소스 대 소스 컴파일도 있다.
+
+React Compiler는 개발자가 작성한 JavaScript를 분석해 최적화된 JavaScript를 만든다. JSX 변환이나 TypeScript의 타입 제거와는 목적이 다르다. 현재 공식 Next.js 통합에서 사용하는 실행 경로는 Babel 플러그인이며, Next.js의 SWC는 적용할 파일을 선별하는 역할을 한다.
+
+## 수동 메모이제이션과 무엇이 달라질까?
+
+검색어로 목록을 거르는 컴포넌트를 생각해 보자. 아래 예제는 React Compiler가 설정된 클라이언트 환경을 전제로 한다.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+type Product = { id: string; name: string };
+
+export function ProductList({ products }: { products: Product[] }) {
+  const [query, setQuery] = useState('');
+  const [dark, setDark] = useState(false);
+  const visibleProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <section data-theme={dark ? 'dark' : 'light'}>
+      <input
+        aria-label="상품 검색"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      <button onClick={() => setDark((value) => !value)}>테마 변경</button>
+      <ul>
+        {visibleProducts.map((product) => (
+          <li key={product.id}>{product.name}</li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+수동으로 최적화한다면 `products.filter(...)`를 `useMemo`로 감싸고 의존성에 `products`와 `query`를 넣을 수 있다. Compiler는 데이터의 흐름을 분석해 이런 재사용 기회를 자동으로 찾는다.
+
+테마만 바뀌었을 때도 컴포넌트는 상태 변경에 따라 렌더링된다. 하지만 `products`와 `query`가 바뀌지 않았다면 필터 계산을 재사용할 여지가 있다. 부모가 매번 새 `products` 배열을 전달한다면 캐시 재사용 조건도 달라진다.
+
+여기서 메모이제이션은 네트워크 응답 캐시나 Next.js의 서버 데이터 캐시와는 별개다. 여러 컴포넌트가 호출하는 일반 함수의 결과를 애플리케이션 전체에서 공유하는 캐시로 생각해서도 안 된다.
+
+### 기존 useMemo와 useCallback은 지워야 할까?
+
+도입과 동시에 일괄 삭제할 필요는 없다. [React 설치 가이드](https://react.dev/learn/react-compiler/installation)는 기존 코드에 컴파일러를 통합하는 방법을 제공한다. 먼저 기존 동작과 최적화를 유지한 채 적용하고, 측정과 동작 확인을 거쳐 수동 메모이제이션을 정리하는 편이 안전하다.
+
+새 코드에서는 Compiler에 맡길 수 있는 부분이 늘어나지만, 코드의 정확성이 캐시 유지 여부에 의존하지 않도록 작성해야 한다. 특히 Effect가 특정 객체의 참조 안정성에 의존한다면 관련 로직도 함께 살펴봐야 한다.
+
+## Next.js에서 활성화하기
+
+Next.js 16에서 React Compiler는 안정화된 선택 기능이다. React를 사용한다고 자동으로 활성화되는 것은 아니므로 프로젝트 설정을 확인해야 한다.
+
+[Next.js 공식 설정 문서](https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler)에 따라 개발 의존성을 설치한다.
+
+```bash
+pnpm add -D babel-plugin-react-compiler
+```
+
+기존 설정을 유지하면서 `reactCompiler` 옵션을 추가한다.
+
+```ts
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  reactCompiler: true,
+};
+
+export default nextConfig;
+```
+
+Next.js는 JSX나 React Hooks가 있는 관련 파일에 플러그인을 적용하도록 SWC로 선별한다. 모든 파일에 Babel 플러그인을 적용하는 방식보다 불필요한 작업을 줄이지만, 기본 빌드와 비교하면 빌드 시간이 늘어날 수 있다.
+
+위 코드는 적용 방법을 설명하는 예제다. 이 글을 추가하는 작업에서 블로그 자체의 컴파일러 설정이나 의존성을 변경하지는 않았다.
+
+## 모든 컴포넌트가 최적화될까?
+
+Compiler는 React의 규칙을 지킨 코드를 전제로 한다. 대표적으로 컴포넌트와 훅은 순수해야 하고, 훅 호출 순서를 지켜야 하며, props나 state를 직접 변경해서는 안 된다.
+
+예를 들어 렌더링 중 외부 배열에 값을 추가하거나 조건문 안에서 훅을 호출하는 코드는 먼저 수정해야 한다. 컴파일러가 이런 코드를 발견하면 해당 최적화를 건너뛸 수 있다. 그러나 모든 규칙 위반을 탐지하는 것은 아니며, 빌드 성공만으로 코드가 올바르다고 판단해서는 안 된다.
+
+기본 추론 모드에서는 컴포넌트·훅의 이름과 코드 형태를 함께 살펴 대상을 판단한다. 단순히 이름이 대문자로 시작한다는 이유만으로 무조건 최적화되는 것은 아니다. 클래스 컴포넌트도 자동 최적화 대상에 포함되지 않는다.
+
+문제가 생기면 [공식 디버깅 가이드](https://react.dev/learn/react-compiler/debugging)에 따라 컴파일러 적용 전후의 동작을 비교한다. 특정 함수를 임시로 제외하려면 함수 본문 맨 앞에 지시어를 둔다.
+
+```tsx
+function StatusLabel({ status }: { status: string }) {
+  'use no memo';
+
+  return <span>{status}</span>;
+}
+```
+
+[`'use no memo'`](https://react.dev/reference/react-compiler/directives/use-no-memo)는 문제 범위를 좁히기 위한 수단이다. 원인을 해결한 뒤 제거하고 다시 확인한다.
+
+## 최적화가 적용됐는지 확인하기
+
+설정 파일에 옵션이 있다고 효과까지 보장되는 것은 아니다. 적용 여부와 사용자 경험의 개선을 나눠 확인하면 판단하기 쉽다.
+
+1. **React DevTools의 Components 탭**에서 컴파일된 컴포넌트의 `Memo ✨` 배지를 확인한다. 배지는 적용 여부를 보여 주며, 성능 개선의 크기를 증명하지는 않는다.
+2. **Profiler에서 같은 상호작용을 녹화**한다. 앞의 예제라면 검색어 입력과 테마 변경을 각각 비교한다. 필요하면 렌더링 이유 기록 옵션을 활성화한다.
+3. **렌더링 시간과 실제 반응성을 비교**한다. 컴파일러를 켜기 전후에 같은 데이터, 같은 빌드 조건에서 반복 측정한다. 개발 모드의 Strict Mode로 인한 추가 실행도 구분한다.
+
+`console.log`는 코드가 실행되는지 빠르게 살피는 데는 유용하지만, 실행 횟수만으로 성능을 평가하기 어렵다. 필요하면 React의 `Profiler` API로 렌더링 시간을 수집할 수 있다. 프로덕션 프로파일링에는 별도 지원 빌드가 필요하다는 점도 고려해야 한다.
+
+## 메모이제이션 비용이 더 커질 수도 있을까?
+
+캐시를 유지하려면 저장 공간과 비교 작업이 필요하다. 입력이 매번 바뀌거나 원래 계산이 아주 가볍다면 재사용으로 얻는 이득이 작을 수 있다. 자동 최적화라고 비용이 사라지는 것은 아니다.
+
+React Compiler는 세밀한 분석으로 재사용할 부분을 고르지만, 모든 앱에서 같은 개선 폭을 보장하지 않는다. 다른 서비스의 벤치마크 수치를 내 화면의 예상 성능으로 그대로 가져오기보다, 실제 데이터와 상호작용을 기준으로 비교해야 한다.
+
+도입할 때는 자주 사용하는 화면 하나에서 시작해 적용 여부, 동작 변화, 렌더링 시간, 빌드 시간을 확인한다. 문제가 없다면 범위를 넓힌다. 수동 메모이제이션을 줄일 수 있다는 편의성과 실제 사용자가 느끼는 개선을 함께 보는 것이 좋다.
+
+## 참고 자료
+
+- [원문 노트: React 컴파일러 정리](https://app.notion.com/p/React-3b14de6b7fb98186928cfe3c6fce5e8b)
+- [React Compiler 1.0 발표 — 2025년 10월 7일](https://react.dev/blog/2025/10/07/react-compiler-1)
+- [React Compiler 소개](https://react.dev/learn/react-compiler/introduction)
+- [React Compiler 설치](https://react.dev/learn/react-compiler/installation)
+- [React Compiler 디버깅](https://react.dev/learn/react-compiler/debugging)
+- [Next.js reactCompiler 설정](https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler)
+
+공식 문서는 2026년 10월 27일에 확인했다. 버전별 설정은 사용하는 프로젝트의 버전에 맞춰 다시 확인하자.
