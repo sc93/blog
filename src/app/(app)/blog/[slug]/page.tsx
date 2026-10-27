@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { author } from '@/lib/blog';
@@ -171,7 +172,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </div>
       <div className="container-wrapper">
         <div className="container py-6">
-          <Breadcrumb items={breadcrumbItems} />
+          <Link href="/blog" className="text-sm underline underline-offset-4">
+            ← 전체 글로 돌아가기
+          </Link>
         </div>
       </div>
     </div>
