@@ -17,7 +17,8 @@
     "clean": "rm -rf .next/ node_modules/",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.mjs",
+    "new:post": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/new-post.mjs"
   },
   "packageManager": "pnpm@10.14.0",
   "dependencies": {
@@ -97,6 +98,15 @@
     "plugins": [
       "@ianvs/prettier-plugin-sort-imports",
       "prettier-plugin-tailwindcss"
+    ],
+    "overrides": [
+      {
+        "files": "*.mdx",
+        "options": {
+          "importOrder": [],
+          "embeddedLanguageFormatting": "off"
+        }
+      }
     ]
   },
   "engines": {
