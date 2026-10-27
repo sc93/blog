@@ -134,6 +134,30 @@ git push -u origin main
 
 공개 글 상세는 빌드 시 정적 생성되며 쿼리 필터를 사용하는 목록은 서버에서 렌더링합니다. Google Fonts를 사용하는 기존 템플릿이므로 빌드 환경에서 Google Fonts에 접근할 수 있어야 합니다.
 
+## 작업 브랜치와 PR
+
+새 기능, 설정 변경이나 새 글 작성·발행은 최신 main에서 새 `codex/<작업명>` 브랜치를 만들어 진행합니다. 같은 PR의 피드백 수정은 해당 브랜치를 계속 사용합니다.
+
+커밋은 작업 단위로 나누고 `<종류>: <한글 간략 설명>` 형식으로 작성합니다.
+
+```text
+feat: 글 검색 기능 추가
+fix: 태그 필터 오류 수정
+docs: 영어 표현 학습 글 작성
+chore: 개발 환경 설정 정리
+```
+
+검증 후 작업 브랜치를 푸시하고 main 대상 PR을 만듭니다. PR 제목도 같은 형식을 사용하고, 본문에 변경 이유·작업 내용·검증 결과를 한국어로 작성합니다. 글 작업에는 공개 여부를 포함합니다. PR 생성 후 코드·콘텐츠 리뷰 결과를 PR에 남기고, 상세 리뷰 지침이 제공되면 해당 지침을 적용합니다. 병합은 사용자의 명시적인 요청이 있을 때 진행합니다.
+
+AI 지침의 진입점은 [AGENTS.md](AGENTS.md)입니다. 상세 지침은 적용 범위별로 분리합니다.
+
+- [Git 작업 절차](docs/ai/git-workflow.md): 브랜치·커밋·푸시·PR
+- [코드 리뷰 지침](docs/ai/code-review.md): 리뷰와 결과 기록, 추후 상세 지침
+- [검증 지침](docs/ai/verification.md): 변경 종류별 검사
+- [콘텐츠 지침](src/content/AGENTS.md): 글 메타데이터와 공개 규칙
+
+PR 작성 양식은 [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)에 있습니다.
+
 ## 라이선스와 출처
 
 MIT License. 원본 템플릿 작성자 cakegaly와 [next-minimal-blog](https://github.com/cakegaly/next-minimal-blog)에 감사드립니다. 기존 디자인과 shadcn/ui 기반 컴포넌트, MDX 렌더링, 문법 강조, 다크 모드를 재사용했습니다. 작업 지침은 `AGENTS.md`를 참고하세요.
