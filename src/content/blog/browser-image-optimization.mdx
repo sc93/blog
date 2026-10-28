@@ -1,0 +1,175 @@
+---
+title: '브라우저는 어떤 이미지를 다운로드할까? - 이미지 최적화 (1)'
+description: '파일의 픽셀과 CSS 표시 크기, DPR의 관계를 바탕으로 브라우저가 srcset과 sizes에서 이미지 후보를 선택하는 원리를 정리합니다.'
+date: '2026-10-28'
+category: 'development'
+tags: ['HTML', '이미지 최적화', '웹 성능']
+published: true
+thumbnail: '/images/browser-image-optimization.webp'
+---
+
+화면에 작게 표시되는 이미지라도 브라우저는 큰 원본 파일을 다운로드할 수 있습니다. 표시 크기와 기기의 픽셀 밀도에 맞는 파일을 제공하면, 필요한 화질을 유지하면서 불필요한 데이터 전송을 줄일 수 있습니다. 전송량이 줄면 다운로드 시간이 짧아져 첫 화면의 주요 이미지를 더 빨리 표시하는 데 도움이 될 수 있습니다.
+
+이번 글에서는 최적화의 출발점인 파일 선택에 집중해, 브라우저가 CSS 표시 크기와 DPR을 바탕으로 `srcset`과 `sizes`에서 이미지 후보를 선택하는 원리를 살펴봅니다.
+
+## 1. 이미지 발견부터 표시까지
+
+<b>HTML에서 이미지 발견 → 후보 선택 및 요청 → 다운로드 → 디코딩 → 화면에 그리기</b>
+
+브라우저는 HTML에서 이미지 주소를 발견하고 후보를 선택합니다. 내려받은 이미지 데이터는 디코딩을 거쳐 화면에 표시됩니다. 이 흐름은 개념적인 구분이며, 실제로는 다운로드와 표시 등의 작업이 겹쳐 진행될 수 있습니다.
+
+## 2. 이미지 파일의 픽셀과 CSS 표시 크기
+
+가로 1200픽셀, 세로 800픽셀인 사진을 예로 들어 보겠습니다. 파일에는 1200 × 800개의 픽셀이 있지만, CSS에서는 너비 400px로 표시할 수 있습니다.
+
+CSS의 `px`는 레이아웃을 위한 논리적 단위로, 이미지 파일의 픽셀 수와 구분합니다.
+
+| 구분             | 의미                                | 예시                   |
+| ---------------- | ----------------------------------- | ---------------------- |
+| 파일의 픽셀 크기 | 래스터 이미지에 들어 있는 픽셀 수   | 1200 × 800 이미지 픽셀 |
+| CSS 표시 크기    | 레이아웃에서 이미지가 차지하는 크기 | 너비 400px             |
+
+```html
+<img
+  src="/images/landscape-1200.jpg"
+  alt="산과 호수가 보이는 풍경"
+  width="1200"
+  height="800"
+  style="width: 400px; height: auto;"
+>
+```
+
+이 코드에서 CSS는 표시 너비를 400px로 정합니다. 하지만 CSS로 작게 표시한다고 400픽셀짜리 파일을 다운로드하는 것은 아닙니다. <code>src</code>가 가리키는 1200픽셀 파일을 받아서 축소해 표시합니다.
+
+즉, <b>화면에서 작게 보이게 하는 것과 작은 파일을 받게 하는 것은 별개의 작업</b>입니다.
+
+## 3. DPR에 따른 이미지 해상도
+
+CSS 픽셀은 화면의 물리 픽셀과 항상 일대일로 대응하지 않습니다. 이 관계를 이해할 때 사용하는 값이 DPR(Device Pixel Ratio)입니다. 브라우저에서는 <code>window.devicePixelRatio</code>로 확인할 수 있으며, 화면 환경이나 페이지 확대에 따라 달라질 수 있습니다.
+
+[MDN의 devicePixelRatio 설명](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
+
+CSS에서 너비 400px로 표시하는 이미지라도 DPR이 2라면 가로 방향으로 약 800개의 이미지 픽셀이 있어야 화면의 픽셀 밀도에 대응할 수 있습니다.
+
+```txt
+필요한 이미지 너비의 기준 ≈ CSS 표시 너비 × DPR
+
+400px × DPR 1 = 400 이미지 픽셀
+400px × DPR 2 = 800 이미지 픽셀
+400px × DPR 3 = 1200 이미지 픽셀
+```
+
+여기서 계산한 값은 후보 선택을 이해하기 위한 기준입니다. 무조건 그 크기의 파일을 받아야 한다는 규칙은 아닙니다. 원본의 품질, 압축 수준, 네트워크 비용까지 고려하면 적절한 크기는 달라질 수 있습니다.
+
+직접 계산한 크기에 맞춰 JavaScript로 주소를 바꿀 필요는 없습니다. HTML에는 브라우저에 선택지를 전달하는 방법이 있습니다.
+
+## 4. srcset과 sizes를 통한 후보 선택
+
+<code>srcset</code>의 <code>w</code> descriptor는 각 파일의 실제 픽셀 너비를 나타냅니다.
+
+```html
+srcset="
+  /images/landscape-480.jpg 480w,
+  /images/landscape-800.jpg 800w,
+  /images/landscape-1200.jpg 1200w,
+  /images/landscape-1600.jpg 1600w
+"
+```
+
+<code>800w</code>는 “화면에 800px로 표시하라”가 아니라 “이 파일의 너비는 800 이미지 픽셀이다”라는 뜻입니다. 각 URL은 선언한 너비에 맞는 이미지를 제공해야 합니다. 이미지를 미리 생성하거나 서버에서 변환할 수 있으며, 숫자만 붙여서는 파일이 작아지지 않습니다.
+
+<code>sizes</code>는 현재 레이아웃에서 이미지가 차지할 너비를 브라우저에 알려줍니다. 다음 예제는 뷰포트가 600px 이하이면 화면 너비 전체를, 그보다 크면 600px를 차지하는 이미지입니다.
+
+```html
+<style>
+  body {
+    margin: 0;
+  }
+
+  .article-image {
+    display: block;
+    width: 100vw;
+    max-width: 600px;
+    height: auto;
+  }
+</style>
+
+<img
+  class="article-image"
+  src="/images/landscape-800.jpg"
+  srcset="
+    /images/landscape-480.jpg 480w,
+    /images/landscape-800.jpg 800w,
+    /images/landscape-1200.jpg 1200w,
+    /images/landscape-1600.jpg 1600w
+  "
+  sizes="(max-width: 600px) 100vw, 600px"
+  width="1200"
+  height="800"
+  alt="산과 호수가 보이는 풍경"
+>
+```
+
+예제의 후보 파일은 모두 같은 구도로, 리사이즈 시 픽셀 반올림을 고려해 약 3:2 비율로 준비했다고 가정합니다. <code>src</code>는 기본 이미지 주소이자 호환성을 위한 대체 경로입니다. <code>w</code> descriptor를 지원하는 브라우저는 이 예제에서 <code>srcset</code>과 <code>sizes</code>를 이용해 후보를 선택합니다.
+
+<code>sizes</code>는 앞에서부터 조건을 평가하고 처음 맞는 항목을 사용합니다. 마지막 <code>600px</code>는 앞 조건에 해당하지 않을 때의 값입니다. <b>실제 레이아웃은 CSS가 만들고, <code>sizes</code>는 그 너비를 선택 과정에 전달합니다.</b> <code>sizes</code>만 바꿔도 화면의 이미지 크기가 바뀌지는 않습니다.
+
+[HTML 표준의 반응형 이미지 설명](https://html.spec.whatwg.org/dev/images.html)
+
+### 후보를 선택하는 과정을 숫자로 보면
+
+위 예제에서 일반적인 밀도 기준으로 예상하면 다음과 같습니다.
+
+| 뷰포트 너비 | sizes로 계산한 너비 | DPR | 목표 너비 | 예상 후보 |
+| ----------- | ------------------- | --- | --------- | --------- |
+| 400px       | 400px               | 1   | 400px     | 480w      |
+| 400px       | 400px               | 2   | 800px     | 800w      |
+| 400px       | 400px               | 3   | 1200px    | 1200w     |
+| 1000px      | 600px               | 2   | 1200px    | 1200w     |
+
+이 표는 계산 예시이며 실제 다운로드 결과를 보장하지 않습니다. 브라우저는 네트워크 상태 등도 고려할 수 있고, 캐시나 이미 받은 이미지의 재사용 때문에 결과가 달라질 수 있습니다. 화면을 줄였다고 반드시 더 작은 파일을 새로 받는 것도 아닙니다.
+
+<code>w</code> 후보를 쓰면서 일반적인 <code>sizes</code>를 생략하면 선택 계산에서 기본적으로 <code>100vw</code>가 사용됩니다. 실제로는 600px인 이미지를 더 넓게 표시한다고 판단하면 필요 이상으로 큰 후보를 받을 수 있습니다. 정확한 <code>sizes</code>가 중요한 이유입니다.
+
+[HTML 표준의 sizes 규칙](https://html.spec.whatwg.org/dev/images.html#sizes-attributes)
+
+파일 선택과 로딩 시점은 별개의 문제입니다. `loading`은 지연 로딩 여부를, `fetchpriority`는 요청 우선순위에 대한 힌트를 전달합니다. 첫 화면에서 가장 큰 콘텐츠가 표시되는 시점을 측정하는 LCP의 대상 이미지라면 지연 로딩을 피해야 합니다.
+
+[web.dev의 LCP 최적화 가이드](https://web.dev/articles/optimize-lcp)
+
+## 5. 실제로 어떤 파일을 받았는지 확인하기
+
+설정 후에는 브라우저 개발자 도구에서 확인합니다.
+
+1. 원하는 뷰포트와 DPR을 설정하고, 캐시를 비활성화한 상태로 새로고침합니다.
+2. Network 패널에서 이미지 요청 URL과 전송량, 요청 시점 및 소요 시간을 확인합니다.
+
+다음 코드는 위의 <code>.article-image</code> 예제에서 선택된 주소와 표시 너비를 확인하는 용도입니다.
+
+```javascript
+const image = document.querySelector(".article-image");
+
+if (image instanceof HTMLImageElement) {
+  console.table({
+    selectedURL: image.currentSrc,
+    displayWidthCSSPx: image.getBoundingClientRect().width,
+    dpr: window.devicePixelRatio,
+  });
+}
+```
+
+이미지 선택이 끝난 뒤 실행합니다. <code>currentSrc</code>는 선택된 URL을 보여주며, 다운로드가 성공했다는 뜻까지는 아닙니다. 실제 요청은 Network 패널과 함께 확인합니다.
+
+[MDN의 currentSrc 설명](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/currentSrc)
+
+## 핵심 요약
+
+- 파일의 픽셀 크기와 CSS 표시 크기는 다릅니다. CSS로 줄여도 다운로드할 파일이 작아지지는 않습니다.
+- 표시 너비 × DPR을 기준으로 필요한 이미지의 픽셀 너비를 생각할 수 있습니다.
+- `srcset`은 파일 후보를, `sizes`는 예상 표시 너비를 전달합니다. 최종 선택은 브라우저가 하며, 실제 결과는 `currentSrc`와 Network 패널로 확인합니다.
+
+다만 파일을 줄인 만큼 화면 표시가 빨라지는 것은 아닙니다. 이미지의 발견 시점과 렌더링 지연 등도 영향을 줍니다.
+
+## 다음 편에서는
+
+2편에서는 Next.js의 Image 컴포넌트를, 3편에서는 서버의 이미지 변환과 캐시, 이미지 포맷을 다룹니다.
