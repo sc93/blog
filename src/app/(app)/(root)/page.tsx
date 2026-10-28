@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { siteConfig } from '@/lib/config';
 import { getAllBlogPosts } from '@/lib/mdx';
 import { PostList } from '@/components/content/post-list';
 import { AboutCta } from '@/components/shared/about-cta';
@@ -9,8 +10,8 @@ export const dynamic = 'force-static';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  title: '학습 기록',
-  description: '개발과 영어를 꾸준히 기록합니다.',
+  title: { absolute: siteConfig.name },
+  description: siteConfig.description,
   alternates: { canonical: '/' },
 };
 

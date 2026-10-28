@@ -1,6 +1,8 @@
-# sc93 학습 노트
+# 살아남아야 하는 개발자
 
-개발과 영어를 꾸준히 기록하는 개인 학습 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
+배우기를 멈추면 살아남지 못한다.
+
+개발 경험과 배움을 기록하는 개인 블로그입니다. [Next.js Minimal Blog](https://github.com/cakegaly/next-minimal-blog)를 기반으로 기존 디자인과 MDX 컴포넌트를 재사용합니다. DB나 CMS 없이 파일과 Git으로 운영합니다.
 
 ## 기술 스택
 
@@ -95,10 +97,10 @@ published: false
 
 | 주소                                   | 내용                                    |
 | -------------------------------------- | --------------------------------------- |
-| `/`                                    | 소개와 최근 학습 기록                   |
+| `/`                                    | 소개와 최신 글                          |
 | `/blog`                                | 전체 글                                 |
 | `/blog?page=2&tag=React`               | 태그로 필터링한 글의 2페이지            |
-| `/blog?category=english`               | 영어 학습 기록                          |
+| `/blog?category=english`               | 영어 글                                 |
 | `/blog?category=development&tag=React` | 카테고리와 태그를 함께 필터링           |
 | `/blog/react-rendering`                | 글 상세, 카테고리는 URL에 포함하지 않음 |
 | `/rss.xml`                             | 공개 글 RSS                             |

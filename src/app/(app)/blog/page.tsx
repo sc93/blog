@@ -43,8 +43,8 @@ export async function generateMetadata({
   const title =
     [category?.name, tag?.name].filter(Boolean).join(' · ') || '전체 글';
   const description = tag
-    ? `${tag.name} 태그의 학습 기록을 모았습니다.`
-    : '개발과 일상의 학습 기록을 모았습니다.';
+    ? `${tag.name} 태그의 글을 모았습니다.`
+    : siteConfig.description;
   const canonical = getBlogListHref(
     typeof query.page === 'string' && /^[1-9]\d*$/.test(query.page)
       ? Number(query.page)
@@ -147,8 +147,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </h1>
                 <p className="text-muted-foreground mt-1">
                   {tag
-                    ? `${tag.name} 태그의 학습 기록을 모았습니다.`
-                    : '개발과 일상의 학습 기록을 모았습니다.'}
+                    ? `${tag.name} 태그의 글을 모았습니다.`
+                    : siteConfig.description}
                 </p>
               </div>
             </div>
