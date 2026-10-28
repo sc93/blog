@@ -18,6 +18,16 @@ export function koreaDate(date = new Date()) {
   return `${value('year')}-${value('month')}-${value('day')}`;
 }
 
+export function koreaTime(date = new Date()) {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Seoul',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).format(date);
+}
+
 export async function createPost(
   { category, title, slug },
   dir = path.join(process.cwd(), 'src/content/blog')
@@ -30,10 +40,12 @@ export async function createPost(
     throw new Error('slug는 소문자 영문·숫자·하이픈만 사용할 수 있습니다.');
   await mkdir(dir, { recursive: true });
   const file = path.join(dir, `${slug}.mdx`);
+  const now = new Date();
   const content = `---
 title: ${JSON.stringify(title.trim())}
 description: ""
-date: "${koreaDate()}"
+date: "${koreaDate(now)}"
+time: "${koreaTime(now)}"
 category: ${category}
 tags: []
 published: false

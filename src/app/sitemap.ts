@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { siteConfig } from '@/lib/config';
+import { getPostDateTime } from '@/lib/content';
 import { getAllBlogPosts } from '@/lib/mdx';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
   const blogPages = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(`${post.metadata.date}T00:00:00+09:00`),
+    lastModified: new Date(getPostDateTime(post.metadata)),
   }));
 
   const staticPages = [

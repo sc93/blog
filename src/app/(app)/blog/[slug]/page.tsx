@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { author } from '@/lib/blog';
 import { siteConfig } from '@/lib/config';
-import { categories } from '@/lib/content';
+import { categories, getPostDateTime } from '@/lib/content';
 import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx';
 import { absoluteUrl, formatDate } from '@/lib/utils';
 import { Button } from '@/components/shadcn-ui/button';
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       title: post.metadata.title,
       description: post.metadata.description,
       type: 'article',
-      publishedTime: `${post.metadata.date}T00:00:00+09:00`,
+      publishedTime: getPostDateTime(post.metadata),
       section: categories[post.metadata.category].name,
       tags: post.metadata.tags,
       url: absoluteUrl(`/blog/${post.slug}`),

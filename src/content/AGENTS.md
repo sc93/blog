@@ -16,7 +16,7 @@
 ## 저장 구조와 메타데이터
 
 - 글은 `src/content/blog/*.mdx`에서 관리한다. slug는 파일명이며 전체에서 고유한 소문자 영문·숫자·하이픈으로 작성한다.
-- Frontmatter의 `title`, `description`, `date`, `category`, `tags`, `published`를 검증한다. `date`는 따옴표로 감싼 실제 날짜 `YYYY-MM-DD`다. 초안의 description은 빈 문자열을 허용한다.
+- Frontmatter의 `title`, `description`, `date`, `category`, `tags`, `published`를 검증한다. `date`는 따옴표로 감싼 실제 날짜 `YYYY-MM-DD`다. 선택 필드 `time`은 한국 시간 기준의 `HH:mm:ss`이며 생략 시 `00:00:00`으로 취급한다. 글은 날짜·시각 내림차순, 동률이면 slug 오름차순으로 정렬한다. 초안의 description은 빈 문자열을 허용한다.
 - 카테고리 정의는 [src/lib/content.ts](../lib/content.ts)의 `categories` 한 곳에서 관리한다. 태그는 Frontmatter에서 자유롭게 작성한다.
 - 글 생성은 기존 `pnpm new:post`를 사용한다. 기본 `published: false`와 기존 파일 덮어쓰기 방지를 유지한다.
 
