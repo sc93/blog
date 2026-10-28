@@ -1,0 +1,205 @@
+---
+title: 'Next.js Image는 무엇을 해줄까? - 이미지 최적화 (2)'
+description: 'Next.js Image가 만드는 이미지 후보와 최적화 URL을 살펴보고, width·height, fill, sizes와 로딩 속성을 실제 레이아웃에 맞게 설정하는 방법을 정리합니다.'
+date: '2026-10-28'
+time: '13:28:38'
+category: 'development'
+tags: ['Next.js', '이미지 최적화', '웹 성능']
+published: true
+thumbnail: '/images/nextjs-image-optimization.webp'
+---
+
+Next.js의 `Image`는 이미지 후보와 최적화 URL을 만들어 주지만, 화면에서 이미지가 차지할 공간까지 대신 설계하지는 않습니다. 각 속성의 역할을 이해하면 필요한 화질을 유지하면서 과도한 다운로드를 줄이고, 첫 화면의 주요 이미지를 늦게 요청하는 문제를 피할 수 있습니다.
+
+[1편](/blog/browser-image-optimization)에서는 브라우저가 표시 너비와 DPR을 바탕으로 파일을 선택하는 원리를 살펴봤습니다. 이번에는 그 선택을 돕기 위해 `Image`가 어떤 정보를 만들고, 개발자가 무엇을 전달해야 하는지 정리합니다.
+
+예제는 이 블로그가 사용하는 **Next.js 16.2.6의 App Router와 기본 이미지 로더**를 기준으로 합니다.
+
+## 1. Image는 이미지 후보와 요청 주소를 만듭니다
+
+```tsx
+import Image from 'next/image';
+
+export default function Profile() {
+  return (
+    <Image
+      src="/images/profile.jpg"
+      alt="작성자 프로필"
+      width={400}
+      height={400}
+    />
+  );
+}
+```
+
+원본이 `public/images/profile.jpg`에 있다면 `src`에는 `/images/profile.jpg`를 전달합니다. 기본 설정에서 위 예제는 다음과 같은 최적화 URL을 후보로 만듭니다.
+
+```txt
+/_next/image?url=%2Fimages%2Fprofile.jpg&w=640&q=75 1x
+/_next/image?url=%2Fimages%2Fprofile.jpg&w=828&q=75 2x
+```
+
+`url`은 원본 경로, `w`는 요청하는 출력 너비, `q`는 품질 설정입니다. `width={400}`이라고 해서 요청 너비가 반드시 400이 되지는 않습니다. Next.js가 설정된 너비 목록에서 후보를 만들고, 브라우저는 생성된 `srcset`에서 파일을 선택합니다. 요청을 받은 기본 최적화 서버는 이미지 변환을 처리합니다.
+
+**후보를 만드는 Next.js, 후보를 선택하는 브라우저, 요청에 응답하는 이미지 서버의 역할을 구분하는 것이 핵심입니다.**
+
+[Next.js 16.2.6의 이미지 속성 생성 구현](https://github.com/vercel/next.js/blob/v16.2.6/packages/next/src/shared/lib/get-img-props.ts)
+
+## 2. width·height와 CSS는 서로 다른 정보를 전달합니다
+
+`width`와 `height`는 이미지의 고유 크기와 비율을 전달합니다. CSS와 함께 표시 크기를 결정하며, 비율은 이미지가 로드되기 전 공간 확보에도 사용됩니다. 기본 로더에서는 `width`가 후보 생성에도 관여합니다.
+
+```tsx
+import Image from 'next/image';
+
+export default function ArticleImage() {
+  return (
+    <Image
+      src="/images/landscape.jpg"
+      alt="산과 호수가 보이는 풍경"
+      width={1200}
+      height={800}
+      sizes="(max-width: 600px) 100vw, 600px"
+      style={{ width: '100%', maxWidth: 600, height: 'auto' }}
+    />
+  );
+}
+```
+
+원본은 1200×800이고, CSS 표시 너비는 최대 600px입니다. `height: 'auto'`로 비율을 유지합니다. 이 예제는 부모가 뷰포트 너비를 사용하고 좌우 여백이 없다고 가정합니다. 여백이나 더 좁은 부모가 있다면 `sizes`도 그 레이아웃에 맞춰야 합니다.
+
+정적 import인 `import landscape from './landscape.jpg'`를 `src={landscape}`로 전달하면 빌드 과정에서 치수를 알 수 있어 `width`·`height`를 생략할 수 있습니다. 문자열 경로나 외부 URL은 이 방식으로 자동 추론되지 않으므로 치수를 전달하거나 `fill`을 사용합니다.
+
+[공식 이미지 최적화 가이드: 로컬 이미지와 외부 이미지](https://nextjs.org/docs/app/getting-started/images)
+
+## 3. fill은 크기가 정해진 부모 영역을 채웁니다
+
+원본 치수를 모르거나 카드처럼 표시 영역이 정해져 있다면 `fill`을 사용할 수 있습니다.
+
+```tsx
+import Image from 'next/image';
+
+export default function CoverImage() {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: 600,
+        aspectRatio: '3 / 2',
+      }}
+    >
+      <Image
+        src="/images/landscape.jpg"
+        alt="산과 호수가 보이는 풍경"
+        fill
+        sizes="(max-width: 600px) 100vw, 600px"
+        style={{ objectFit: 'cover' }}
+      />
+    </div>
+  );
+}
+```
+
+부모의 `position: 'relative'`는 절대 위치로 배치되는 이미지의 기준을 만들고, `aspectRatio`는 높이를 확보합니다. `fill` 자체가 부모 높이를 만들어 주지는 않습니다. 부모 너비와 여백에 대한 전제는 앞 예제와 같습니다.
+
+`objectFit: 'cover'`는 원본 비율을 유지하며 영역을 채우므로 일부가 잘릴 수 있습니다. 전체 이미지가 보여야 한다면 `contain`을 사용하며, 영역과 원본 비율이 다르면 빈 공간이 남습니다.
+
+[공식 Image API: fill](https://nextjs.org/docs/app/api-reference/components/image#fill)
+
+## 4. 반응형 이미지에는 실제 레이아웃에 맞는 sizes가 필요합니다
+
+`Image`가 페이지의 CSS를 해석해 정확한 표시 너비를 알아내는 것은 아닙니다. 앞 예제의 `sizes`는 뷰포트가 600px 이하일 때는 전체 너비, 그보다 크면 600px로 표시된다는 정보를 전달합니다.
+
+```tsx
+sizes="(max-width: 600px) 100vw, 600px"
+```
+
+표시 너비가 400px이고 DPR이 2라면 약 800픽셀, 표시 너비가 600px이면 약 1200픽셀을 선택 기준으로 생각할 수 있습니다. 다만 정확히 그 너비의 후보가 없을 수 있고, 최종 선택은 브라우저가 합니다.
+
+Next.js 16.2.6에서는 `sizes`가 **후보 생성 방식**도 바꿉니다.
+
+| 설정                      | 기본 로더가 만드는 후보                       |
+| ------------------------- | --------------------------------------------- |
+| 숫자 `width`만 지정       | 해당 너비를 기준으로 `1x`·`2x` 밀도 후보 생성 |
+| `sizes` 지정              | 반응형 선택을 위한 `w` 후보 생성              |
+| `fill` 사용, `sizes` 생략 | 기본 기기 너비 후보와 `sizes="100vw"` 생성    |
+
+CSS로는 작게 표시하면서 `sizes`를 크게 전달하면 과도한 파일을 받을 수 있습니다. 반대로 너무 작게 전달하면 선명도가 부족할 수 있으므로 레이아웃을 바꿀 때 함께 확인합니다.
+
+[Next.js 16.2.6의 후보 너비 계산 구현](https://github.com/vercel/next.js/blob/v16.2.6/packages/next/src/shared/lib/get-img-props.ts#L155)
+
+## 5. 첫 화면의 주요 이미지는 로딩 설정도 확인합니다
+
+일반적인 최적화 대상 이미지에서 `Image`의 기본 로딩은 `lazy`입니다. 첫 화면의 주요 이미지가 LCP 요소라면 지연 로딩을 해제하고 필요에 따라 요청 우선순위를 전달합니다.
+
+```tsx
+<Image
+  src="/images/hero.jpg"
+  alt="가을 산길을 걷는 사람"
+  width={1600}
+  height={900}
+  sizes="100vw"
+  loading="eager"
+  fetchPriority="high"
+  style={{ width: '100%', height: 'auto' }}
+/>
+```
+
+전체 뷰포트 너비를 사용하는 예제입니다. `eager`는 지연 로딩을 해제하고, `fetchPriority="high"`는 상대적인 요청 중요도를 전달합니다. JSX에서는 대문자 P를 사용합니다.
+
+Next.js 16부터 `priority`는 deprecated이며 프리로드에는 `preload` 속성을 사용합니다. `preload`는 `<head>`에 이미지 프리로드를 추가하는 별도 선택지입니다. 공식 문서는 `loading`·`fetchPriority`와 함께 사용하지 않도록 안내하며, 대부분의 경우 `eager` 또는 높은 `fetchPriority`를 먼저 고려하도록 설명합니다.
+
+[공식 Image API: preload와 loading](https://nextjs.org/docs/app/api-reference/components/image#preload)
+
+## 6. 외부 이미지에는 허용 범위도 설정합니다
+
+기본 최적화 서버로 외부 이미지를 처리하려면 `remotePatterns`를 설정합니다.
+
+```ts
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com',
+        port: '',
+        pathname: '/posts/**',
+        search: '',
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+```
+
+설명용 호스트를 실제 이미지 서버로 바꿔 사용합니다. 이 설정은 해당 호스트의 `/posts/` 아래 경로를 허용하며 쿼리 문자열은 허용하지 않습니다. API가 원본 너비·높이를 제공하면 함께 전달하고, 치수를 모르면 앞의 `fill` 예제처럼 표시 영역을 정합니다.
+
+[공식 Image API: remotePatterns](https://nextjs.org/docs/app/api-reference/components/image#remotepatterns)
+
+## 설정 후에는 생성된 결과를 확인합니다
+
+| 확인할 것                              | 확인하는 이유                                    |
+| -------------------------------------- | ------------------------------------------------ |
+| 실제 표시 너비와 `sizes`               | CSS와 브라우저에 전달한 정보가 일치하는지        |
+| `srcset`·`currentSrc`와 요청 URL의 `w` | 어떤 후보가 생성·선택되고 어떤 너비를 요청했는지 |
+| `loading`과 Network 요청 시점          | 주요 이미지의 요청이 미뤄지는지                  |
+| 로드 전 이미지 공간                    | 이미지가 나타나며 주변 콘텐츠를 미는지           |
+
+원하는 뷰포트와 DPR을 설정하고 캐시를 비활성화해 새로고침한 뒤 확인합니다. 흐릿한 이미지라면 `quality`부터 높이기보다 표시 너비·DPR·선택 후보를 비교합니다. 품질 설정만으로 부족한 픽셀 수가 해결되지는 않습니다.
+
+## 핵심 요약
+
+- `Image`는 후보와 최적화 URL을 만들고, 실제 파일 선택은 브라우저가 합니다.
+- `width`·`height` 또는 `fill`로 크기와 비율을 전달하고, 반응형 이미지에는 CSS와 일치하는 `sizes`를 설정합니다.
+- 첫 화면의 주요 이미지는 지연 로딩 여부와 우선순위를 확인하고, 속성 적용 후 실제 요청을 검증합니다.
+
+이 글의 후보 목록과 요청 주소는 기본 로더와 설정을 전제로 합니다. 커스텀 로더나 `unoptimized`를 사용하면 동작이 달라집니다. `Image`를 적용했다는 사실만으로 성능 개선이 보장되지는 않으며, LCP와 레이아웃 이동은 실제 페이지에서 측정해야 합니다.
+
+## 다음 편에서는
+
+3편에서는 이미지 변환, WebP·AVIF 포맷 선택과 변환 결과를 재사용하는 캐시를 다룹니다.

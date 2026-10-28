@@ -47,13 +47,14 @@ pnpm new:post
 pnpm new:post --category development --title "React 렌더링 정리" --slug react-rendering
 ```
 
-기본 날짜는 한국 시간(Asia/Seoul)의 오늘이며, `published: false`로 생성합니다. 같은 파일은 덮어쓰지 않습니다. slug는 소문자 영문·숫자·하이픈만 가능하며 전체 글에서 고유해야 합니다. 파일명을 바꾸면 글 URL도 바뀝니다.
+기본 날짜와 작성 시각은 한국 시간(Asia/Seoul)의 현재 시점이며, `published: false`로 생성합니다. 같은 파일은 덮어쓰지 않습니다. slug는 소문자 영문·숫자·하이픈만 가능하며 전체 글에서 고유해야 합니다. 파일명을 바꾸면 글 URL도 바뀝니다.
 
 ```mdx
 ---
 title: 'React 렌더링 정리'
 description: '렌더링 과정과 학습한 내용을 정리합니다.'
 date: '2026-10-27'
+time: '13:30:00'
 category: 'development'
 tags: ['React', 'JavaScript']
 published: false
@@ -66,19 +67,20 @@ published: false
 <Callout>MDX에서 기존 React 컴포넌트도 사용할 수 있습니다.</Callout>
 ```
 
-| 필드          | 설명                                           |
-| ------------- | ---------------------------------------------- |
-| `title`       | 비어 있지 않은 글 제목                         |
-| `description` | 글 설명. 초안은 빈 문자열 허용, 공개 시 필수   |
-| `date`        | 따옴표로 감싼 `YYYY-MM-DD` 형식의 실제 날짜    |
-| `category`    | `development`, `english` 중 하나               |
-| `tags`        | 문자열 배열. 빈 배열 가능, 공백·중복 태그 불가 |
-| `published`   | boolean. 공개하려면 `true`로 변경              |
-| `thumbnail`   | 선택 사항. `/images/...` 형식의 이미지 경로 등 |
+| 필드          | 설명                                                      |
+| ------------- | --------------------------------------------------------- |
+| `title`       | 비어 있지 않은 글 제목                                    |
+| `description` | 글 설명. 초안은 빈 문자열 허용, 공개 시 필수              |
+| `date`        | 따옴표로 감싼 `YYYY-MM-DD` 형식의 실제 날짜               |
+| `time`        | 선택 사항. 한국 시간 기준 `HH:mm:ss`, 생략하면 `00:00:00` |
+| `category`    | `development`, `english` 중 하나                          |
+| `tags`        | 문자열 배열. 빈 배열 가능, 공백·중복 태그 불가            |
+| `published`   | boolean. 공개하려면 `true`로 변경                         |
+| `thumbnail`   | 선택 사항. `/images/...` 형식의 이미지 경로 등            |
 
 `public/images/`에 이미지를 두고 `/images/파일명.png`로 참조할 수 있습니다. 기존 MDX 컴포넌트 매핑은 `src/components/content/mdx-components.tsx`에서 관리합니다. 외부 이미지는 Next.js 이미지 설정에서 호스트 허용이 필요할 수 있습니다.
 
-개발 서버에서는 초안을 목록과 상세에서 확인할 수 있습니다. 프로덕션에서는 초안을 홈·목록·태그·글 상세·RSS·Sitemap에 노출하지 않으며 상세 URL은 404가 됩니다. RSS와 Sitemap은 개발 환경에서도 공개 글만 포함합니다. 공개 글은 작성일 내림차순으로 정렬됩니다. 잘못된 메타데이터는 파일명을 포함한 오류로 알려줍니다.
+개발 서버에서는 초안을 목록과 상세에서 확인할 수 있습니다. 프로덕션에서는 초안을 홈·목록·태그·글 상세·RSS·Sitemap에 노출하지 않으며 상세 URL은 404가 됩니다. RSS와 Sitemap은 개발 환경에서도 공개 글만 포함합니다. 글은 작성일과 작성 시각 내림차순으로 정렬됩니다. 같은 시각이면 slug 오름차순으로 정렬합니다. 목록의 날짜 표시는 기존처럼 일자만 보여 주며 RSS와 공유 메타데이터에는 작성 시각도 반영합니다. 잘못된 메타데이터는 파일명을 포함한 오류로 알려줍니다.
 
 템플릿의 공개 데모 글은 제거했습니다. `draft-example.mdx`는 개발 환경에서만 보이는 비공개 작성 예시이며, 실제 글은 `pnpm new:post`로 생성하세요. 첫 글을 발행하기 전에는 홈과 전체 글 목록에 빈 목록 안내가 표시됩니다.
 

@@ -15,6 +15,7 @@ export type PostMetadata = {
   title: string;
   description: string;
   date: string;
+  time?: string;
   category: Category;
   tags: string[];
   published: boolean;
@@ -53,6 +54,12 @@ export function parsePostMetadata(
   )
     fail('date');
   if (
+    data.time !== undefined &&
+    (typeof data.time !== 'string' ||
+      !/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(data.time))
+  )
+    fail('time (HH:mm:ss)');
+  if (
     typeof data.category !== 'string' ||
     !Object.hasOwn(categories, data.category)
   )
@@ -74,11 +81,18 @@ export function parsePostMetadata(
     title: data.title,
     description: data.description,
     date: data.date,
+    ...(data.time !== undefined ? { time: data.time as string } : {}),
     category: data.category as Category,
     tags: data.tags as string[],
     published: data.published,
     ...(data.thumbnail ? { thumbnail: data.thumbnail as string } : {}),
   };
+}
+
+export function getPostDateTime(
+  metadata: Pick<PostMetadata, 'date' | 'time'>
+): string {
+  return `${metadata.date}T${metadata.time ?? '00:00:00'}+09:00`;
 }
 
 export async function loadBlogPosts(
@@ -106,7 +120,8 @@ export async function loadBlogPosts(
     .filter((post) => includeDrafts || post.metadata.published)
     .sort(
       (a, b) =>
-        b.metadata.date.localeCompare(a.metadata.date) ||
-        a.slug.localeCompare(b.slug)
+        getPostDateTime(b.metadata).localeCompare(
+          getPostDateTime(a.metadata)
+        ) || a.slug.localeCompare(b.slug)
     );
 }

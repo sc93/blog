@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { siteConfig } from '@/lib/config';
+import { getPostDateTime } from '@/lib/content';
 import { getAllBlogPosts } from '@/lib/mdx';
 import { escapeXml } from '@/lib/seo';
 
@@ -25,7 +26,7 @@ export async function GET() {
       <title>${escapeXml(post.metadata.title)}</title>
       <link>${escapeXml(`${baseUrl}/blog/${post.slug}`)}</link>
       <guid isPermaLink="true">${escapeXml(`${baseUrl}/blog/${post.slug}`)}</guid>
-      <pubDate>${new Date(`${post.metadata.date}T00:00:00+09:00`).toUTCString()}</pubDate>
+      <pubDate>${new Date(getPostDateTime(post.metadata)).toUTCString()}</pubDate>
       <description>${escapeXml(post.metadata.description)}</description>
       <category>${escapeXml(post.metadata.category)}</category>
       ${post.metadata.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join('')}
