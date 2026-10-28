@@ -1,6 +1,6 @@
 {
-  "name": "sc93 블로그",
-  "short_name": "sc93",
+  "name": "살아남아야 하는 개발자",
+  "short_name": "살아남아야 하는 개발자",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -15,5 +15,6 @@
   ],
   "theme_color": "#000000",
   "background_color": "#000000",
-  "display": "standalone"
+  "display": "standalone",
+  "description": "배우기를 멈추면 살아남지 못한다."
 }

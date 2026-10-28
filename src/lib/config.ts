@@ -6,8 +6,8 @@ const url = resolveSiteUrl(
 );
 
 export const siteConfig = {
-  name: 'sc93 블로그',
-  description: '개발, 영어 학습을 꾸준히 기록하는 블로그입니다.',
+  name: '살아남아야 하는 개발자',
+  description: '배우기를 멈추면 살아남지 못한다.',
   url,
   ogImage: `${url}/og.png`,
   links: {
