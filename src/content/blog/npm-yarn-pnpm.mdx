@@ -1,0 +1,162 @@
+---
+title: "npm, yarn, pnpm은 무엇이 다를까? 패키지 매니저 이해하기"
+description: "패키지 매니저가 하는 일과 록 파일, 유령 의존성을 살펴보고, npm·yarn·pnpm이 node_modules를 구성하는 방식의 차이를 정리합니다."
+date: "2026-10-30"
+time: "11:13:59"
+category: development
+tags: ['npm', 'Yarn', 'pnpm', '패키지 매니저']
+published: true
+thumbnail: '/images/npm-yarn-pnpm.webp'
+---
+
+새 프로젝트를 받으면 가장 먼저 `npm install`이나 `pnpm install`을 실행합니다. 이 한 줄이 끝나면 `node_modules` 폴더가 생기고 프로젝트를 실행할 수 있게 됩니다. 이 과정을 맡는 도구가 **패키지 매니저**입니다.
+
+패키지 매니저가 의존성을 어떻게 설치하는지 알면 "내 컴퓨터에서는 되는데 다른 환경에서는 안 되는" 문제, `package.json`에 없는 패키지가 import되는 문제, `node_modules`가 지나치게 커지는 이유를 이해할 수 있습니다. 이 글에서는 패키지 매니저가 하는 일을 먼저 살펴보고, npm·yarn·pnpm이 의존성을 설치하는 방식의 차이를 정리합니다.
+
+## 패키지 매니저가 하는 일
+
+`install` 명령을 실행하면 패키지 매니저는 다음 순서로 일합니다.
+
+1. `package.json`에 적힌 의존성과 버전 범위를 읽습니다.
+2. 조건에 맞는 실제 버전을 정하고, 그 패키지가 다시 의존하는 패키지까지 모두 찾습니다.
+3. 패키지를 내려받아 `node_modules`에 배치합니다.
+4. 실제로 설치한 버전을 **록 파일**에 기록합니다.
+
+### 록 파일이 필요한 이유
+
+`package.json`에는 보통 정확한 버전이 아니라 **버전 범위**를 적습니다.
+
+```json
+{
+  "dependencies": {
+    "react": "^19.2.0"
+  }
+}
+```
+
+`^19.2.0`은 "19.2.0 이상, 20.0.0 미만"이라는 뜻입니다. 오늘 설치하면 19.2.0이, 한 달 뒤에 설치하면 19.3.0이 설치될 수 있습니다. 그러면 같은 코드라도 사람마다, 배포 환경마다 다른 버전으로 실행됩니다.
+
+록 파일은 실제로 설치한 정확한 버전과 내려받은 위치를 기록해 둡니다. 록 파일을 함께 커밋하면 누가 언제 설치하든 같은 버전이 설치됩니다. 패키지 매니저마다 록 파일 이름이 다릅니다.
+
+| 패키지 매니저 | 록 파일             |
+| ------------- | ------------------- |
+| npm           | `package-lock.json` |
+| yarn          | `yarn.lock`         |
+| pnpm          | `pnpm-lock.yaml`    |
+
+## 유령 의존성이란
+
+세 패키지 매니저의 차이를 이해하려면 **유령 의존성**(phantom dependency)을 먼저 알아야 합니다. 유령 의존성은 `package.json`에 선언하지 않았는데도 코드에서 import할 수 있는 패키지를 말합니다.
+
+예를 들어 `express`만 설치했는데 다음 코드가 동작하는 경우입니다.
+
+```js
+// package.json에는 express만 있습니다.
+import express from 'express';
+import debug from 'debug'; // 선언하지 않았지만 동작합니다.
+```
+
+`debug`는 `express`가 내부에서 쓰는 패키지입니다. 설치 구조에 따라 `debug`가 `node_modules` 바로 아래에 놓이면, 내 코드에서도 import할 수 있게 됩니다. 당장은 문제가 없어 보이지만 `express`가 업데이트되면서 `debug`를 더 이상 쓰지 않으면, 내 코드는 아무것도 바꾸지 않았는데 갑자기 깨집니다.
+
+유령 의존성이 생기는지는 패키지 매니저가 `node_modules`를 어떤 구조로 만드는지에 달려 있습니다.
+
+## node_modules를 만드는 방식
+
+### 중첩 구조
+
+초기 npm(v2까지)은 패키지가 의존하는 패키지를 그 패키지 폴더 안에 넣었습니다.
+
+```txt
+node_modules/
+└── express/
+    └── node_modules/
+        └── debug/
+```
+
+구조는 이해하기 쉽지만, 여러 패키지가 같은 패키지를 쓰면 그 수만큼 복사본이 생기고 폴더가 끝없이 깊어지는 문제가 있었습니다.
+
+### 평탄 구조(호이스팅)
+
+npm v3부터는 가능한 한 모든 패키지를 `node_modules` 바로 아래로 끌어올립니다. 이를 **호이스팅**이라고 합니다. Yarn Classic(v1)도 같은 방식입니다.
+
+```txt
+node_modules/
+├── express/
+└── debug/      ← express가 쓰는 패키지도 최상위에 놓입니다.
+```
+
+중복이 줄고 폴더가 얕아지지만, `debug`가 최상위에 놓이므로 내 코드에서도 import할 수 있게 됩니다. 앞에서 본 **유령 의존성이 생기는 원인**이 바로 이 구조입니다. 현재 npm도 이 방식을 쓰므로 유령 의존성이 생길 수 있습니다.
+
+### 링크 구조(pnpm)
+
+pnpm은 `node_modules` 바로 아래에 `package.json`에 선언한 패키지만 둡니다. 실제 파일은 `.pnpm` 폴더에 두고 **심볼릭 링크**로 연결합니다.
+
+```txt
+node_modules/
+├── express → .pnpm/express@5.1.0/node_modules/express
+└── .pnpm/
+    ├── express@5.1.0/node_modules/
+    │   ├── express/
+    │   └── debug → ../../debug@4.4.0/node_modules/debug
+    └── debug@4.4.0/node_modules/debug/
+```
+
+내 코드에서 보이는 것은 `express`뿐이라 `debug`를 import하면 에러가 납니다. `express`는 자기 폴더 옆에 연결된 `debug`를 찾을 수 있으므로 정상적으로 동작합니다.
+
+### Plug'n'Play(Yarn)
+
+Yarn v2 이상(Yarn Berry)은 기본적으로 `node_modules`를 만들지 않습니다. 대신 각 패키지가 어디에 있고 무엇에 의존하는지를 `.pnp.cjs` 파일에 기록하고, 패키지는 압축 파일 형태로 캐시에 보관합니다. Node.js가 패키지를 찾을 때 이 파일을 참고하므로, 선언하지 않은 패키지를 import하면 에러가 납니다.
+
+## npm
+
+npm은 Node.js를 설치하면 함께 설치되는 기본 패키지 매니저입니다.
+
+- 별도 설치 없이 바로 쓸 수 있고, 사용자가 가장 많아 관련 자료를 찾기 쉽습니다.
+- 평탄 구조로 설치하므로 유령 의존성이 생길 수 있습니다.
+- 프로젝트마다 `node_modules`에 패키지를 복사하므로, 같은 패키지를 쓰는 프로젝트가 많을수록 디스크 사용량이 늘어납니다.
+- v7부터 하나의 저장소에서 여러 패키지를 관리하는 **workspaces**를 지원합니다.
+
+## yarn
+
+yarn은 2016년 Facebook(현 Meta)이 당시 npm의 느린 설치 속도와 일관성 문제를 해결하려고 만든 패키지 매니저입니다.
+
+- 처음부터 록 파일(`yarn.lock`)과 병렬 설치를 도입했습니다. 이후 npm도 `package-lock.json`(v5)을 도입하면서 두 도구의 차이가 줄었습니다.
+- Yarn Classic(v1)과 Yarn Berry(v2 이상)로 나뉘며, 둘은 설정 방식이 많이 다릅니다. Classic은 평탄 구조, Berry는 기본값이 Plug'n'Play입니다.
+- Berry는 설치 방식(linker)을 `pnp`, `pnpm`, `node-modules` 중에서 고를 수 있고 세 방식 모두 안정 기능입니다. Plug'n'Play는 `node_modules`를 전제로 만든 도구와 맞지 않는 경우가 있어 에디터 연동에 추가 설정이 필요할 수 있습니다. 이럴 때는 linker를 `node-modules`로 바꿀 수 있습니다.
+
+## pnpm
+
+pnpm은 "performant npm"의 줄임말로, 디스크 사용량과 의존성 관리의 엄격함에 초점을 맞춘 패키지 매니저입니다.
+
+- **전역 저장소를 씁니다.** 모든 패키지 파일을 컴퓨터의 한 저장소에 한 번만 저장하고, 각 프로젝트의 `node_modules`에는 **하드 링크**로 연결합니다. 같은 버전을 여러 프로젝트에서 써도 디스크 공간을 추가로 거의 쓰지 않습니다.
+- **선언한 패키지만 보이게 합니다.** 앞의 링크 구조 덕분에 내 코드에서는 `package.json`에 선언하지 않은 패키지를 import할 수 없습니다.
+- **workspaces를 지원합니다.** `pnpm-workspace.yaml`에 패키지 위치를 적어 여러 패키지를 함께 관리합니다.
+
+pnpm이 유령 의존성을 막는 범위는 **내 코드 기준**입니다. 기본 설정(`hoist: true`)에서는 호환성을 위해 `node_modules` 안의 패키지끼리는 선언하지 않은 패키지를 찾을 수 있습니다.
+
+## 한눈에 비교하기
+
+| 구분                  | npm                 | yarn                                              | pnpm                                  |
+| --------------------- | ------------------- | ------------------------------------------------- | ------------------------------------- |
+| 설치                  | Node.js에 포함      | 별도 설치                                         | 별도 설치                             |
+| 록 파일               | `package-lock.json` | `yarn.lock`                                       | `pnpm-lock.yaml`                      |
+| 기본 설치 구조        | 평탄 구조           | Classic: 평탄 구조, Berry: Plug'n'Play            | 심볼릭 링크 구조                      |
+| 내 코드의 유령 의존성 | 생길 수 있음        | Classic: 생길 수 있음, Berry(PnP): 에러           | 에러                                  |
+| 디스크 사용           | 프로젝트마다 복사   | Classic: 프로젝트마다 복사, Berry: 압축 파일 캐시 | 전역 저장소에 한 번 저장 후 하드 링크 |
+| workspaces            | v7부터 지원         | 지원                                              | 지원                                  |
+
+## 알아 둘 점
+
+- **한 프로젝트에는 한 가지 패키지 매니저만 씁니다.** 록 파일 형식이 서로 달라, 섞어 쓰면 설치되는 버전이 달라질 수 있습니다. 프로젝트에 있는 록 파일을 보면 어떤 패키지 매니저를 쓰는지 알 수 있습니다.
+- **엄격한 구조는 호환성 문제를 일으킬 수 있습니다.** 평탄한 `node_modules`를 전제로 만든 도구는 pnpm의 심볼릭 링크나 Yarn의 Plug'n'Play에서 동작하지 않을 수 있습니다. 이때 pnpm은 `nodeLinker: hoisted`, Yarn은 `nodeLinker: node-modules`로 npm과 비슷한 구조를 만들 수 있지만, 그만큼 유령 의존성을 막는 효과는 사라집니다. 예를 들어 Next.js의 Turbopack은 Yarn Plug'n'Play를 지원하지 않습니다.
+- **설치 속도는 환경에 따라 다릅니다.** 캐시와 록 파일이 있는지, 의존성이 얼마나 많은지에 따라 순위가 바뀌므로 특정 도구가 항상 가장 빠르다고 보기는 어렵습니다.
+
+[npm 공식 문서 - package-lock.json](https://docs.npmjs.com/cli/configuring-npm/package-lock-json)
+
+[npm 공식 문서 - workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)
+
+[Yarn 공식 문서 - Linkers](https://yarnpkg.com/features/linkers)
+
+[pnpm 공식 문서 - Motivation](https://pnpm.io/motivation)
+
+[pnpm 공식 문서 - node_modules 설정](https://pnpm.io/settings/node-modules)
