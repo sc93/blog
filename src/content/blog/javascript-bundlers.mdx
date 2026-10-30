@@ -118,7 +118,7 @@ next build --webpack
 | ------------- | ------------------------------------------------- | ------------------------------------------ | ------------------------------------- |
 | 공개          | 2012년                                            | 2020년                                     | 2022년                                |
 | 만든 곳       | Tobias Koppers, 오픈소스 커뮤니티                 | Evan You, 오픈소스 커뮤니티                | Vercel                                |
-| 핵심 구현     | JavaScript                                        | Rolldown·Oxc(Rust)                         | Rust                                  |
+| 구현 언어     | JavaScript                                        | TypeScript(내부 도구 Rolldown·Oxc는 Rust)  | Rust                                  |
 | 개발 서버     | 전체 번들을 만든 뒤 제공                          | 요청한 파일만 변환해 네이티브 ESM으로 제공 | 요청한 부분만 번들링                  |
 | 프로덕션 빌드 | Webpack                                           | Rolldown(Vite 8 기준)                      | Turbopack                             |
 | 확장 방식     | loader, plugin                                    | Vite·Rolldown 플러그인                     | `turbopack` 설정, 일부 Webpack loader |
