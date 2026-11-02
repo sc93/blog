@@ -1,0 +1,125 @@
+---
+title: "렌더링 전략이 중요한 이유 - Next.js 활용 (2)"
+description: "CSR, SSR, SSG, ISR이 Next.js의 Pages Router와 App Router에서 어떤 API로 연결되는지, 의도와 어긋나기 쉬운 지점과 함께 정리합니다."
+date: "2026-11-02"
+time: "20:25:57"
+category: development
+tags: ['Next.js', '렌더링', 'Pages Router', 'App Router']
+published: true
+thumbnail: '/images/rendering-strategies-nextjs.webp'
+---
+
+Next.js에서는 렌더링 전략을 직접 고르지 않아도 페이지가 만들어집니다. 그래서 의도와 다른 전략으로 동작해도 알아차리기 어렵습니다. 정적이어야 할 블로그 글이 매 요청 렌더링되고, props에 넘긴 내부 필드가 HTML에 그대로 노출됩니다.
+
+[1편](/blog/rendering-strategies-concepts)에서 정리한 CSR, SSR, SSG, ISR이 Next.js에서 어떤 API로 연결되는지, 그리고 어디서 의도와 어긋나는지 살펴봅니다. 이 글은 Next.js 16을 기준으로 합니다.
+
+## 1. Pages Router의 렌더링 API
+
+```ts
+// pages/posts/[id].tsx
+export const getStaticPaths: GetStaticPaths = async () => {
+  const popular = await getPopularPostIds(); // 인기 글만 선생성
+  return {
+    paths: popular.map((id) => ({ params: { id: String(id) } })),
+    fallback: 'blocking', // 나머지는 첫 요청 때 생성
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const post = await getPost(params!.id as string);
+  if (!post) return { notFound: true };
+  return { props: { post }, revalidate: 60 }; // ISR
+};
+```
+
+- 데이터 함수가 없으면 빌드 시 정적 HTML이 생성됩니다(Automatic Static Optimization).
+- `getStaticProps`는 SSG, 여기에 `revalidate`를 더하면 ISR입니다.
+- `fallback`은 빌드하지 않은 경로의 처리 방식입니다. `false`는 404, `true`는 빈 fallback 페이지를 먼저 주고, `'blocking'`은 완성될 때까지 기다립니다. 크롤러에게는 `true`도 `'blocking'`처럼 동작하므로, 둘의 차이는 사용자에게 로딩 화면을 보여 주느냐입니다.
+- `getServerSideProps`는 SSR입니다. `req`, 쿠키, 쿼리에 접근할 수 있고, 공용 응답이라면 `Cache-Control`을 설정해 CDN 캐시를 걸 수 있습니다.
+
+[Next.js 공식 문서: getStaticPaths](https://nextjs.org/docs/pages/api-reference/functions/get-static-paths)
+
+## 2. Pages Router의 주의점
+
+**클라이언트 내비게이션 때도 `getServerSideProps`가 실행됩니다.** `next/link`로 이동하면 클라이언트가 `/_next/data/{buildId}/...json`을 요청하고, 서버에서 함수가 실행됩니다. 함수가 느리면 페이지 전환도 느립니다.
+
+**props는 전부 HTML에 노출됩니다.** 서버 HTML에 이벤트를 연결하는 hydration을 위해 props가 `__NEXT_DATA__`에 직렬화됩니다. DB의 user 객체를 통째로 넘기면 `passwordHash` 같은 필드가 그대로 보입니다. `Date`처럼 직렬화할 수 없는 값은 넘길 수 없고, 쓰지 않는 필드도 HTML을 무겁게 만듭니다.
+
+[Next.js 공식 문서: getServerSideProps](https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props)
+
+## 3. Pages Router의 한계
+
+1. 전략과 데이터 조회가 페이지 단위입니다. 한 페이지 안에서 상품 설명은 ISR, 재고는 SSR로 나눌 수 없어 클라이언트 fetch로 우회합니다.
+2. 데이터는 페이지 최상단에서만 가져와 props로 내려야 합니다.
+3. 인터랙션이 없는 부분까지 페이지 전체가 hydration됩니다.
+4. 데이터가 HTML과 `__NEXT_DATA__`로 두 번 전송됩니다.
+5. `getServerSideProps`가 끝나야 렌더링이 시작돼 스트리밍이 어렵습니다.
+
+## 4. App Router와 Server Component
+
+```tsx
+// app/posts/[id]/page.tsx — Server Component
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const post = await db.post.find(id); // 컴포넌트에서 바로 조회
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <LikeButton postId={id} /> {/* 'use client' 컴포넌트 */}
+    </article>
+  );
+}
+```
+
+Server Component는 서버에서만 실행되고 JS 번들에 포함되지 않으며 hydration 대상이 아닙니다. 데이터가 필요한 컴포넌트에서 직접 await하므로 Pages Router의 데이터 조회 위치와 hydration 범위, 스트리밍 한계가 줄어듭니다.
+
+**`'use client'`는 CSR이 아닙니다.** Client Component도 첫 요청 때는 서버에서 HTML로 렌더링되고 hydration됩니다. `'use client'`는 클라이언트 번들에 포함되는 경계를 선언합니다. 그래서 서버 HTML과 클라이언트의 첫 렌더링 결과가 달라지는 hydration mismatch는 Client Component에서 그대로 생깁니다.
+
+**RSC Payload로 중복 전송이 사라지지는 않습니다.** RSC Payload에는 Server Component의 렌더링 결과, Client Component의 자리와 JS 참조, Client Component에 넘긴 props가 담깁니다. 첫 요청에서는 HTML과 함께 전달되고, 페이지 전환 때는 Pages Router의 JSON 대신 이 Payload를 받습니다. Server Component의 코드는 전송되지 않지만 렌더링 결과는 HTML과 Payload 두 형태로 갑니다. 줄어드는 것은 JS와 hydration 비용입니다.
+
+경계를 넘는 props는 직렬화할 수 있어야 하고(일반 함수 불가), `'use client'`는 그 파일이 import하는 모듈을 모두 클라이언트 번들로 끌고 오므로 경계는 트리의 잎에 둡니다.
+
+[Next.js 공식 문서: Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+
+## 5. static과 dynamic 판단
+
+App Router는 라우트마다 빌드 시 렌더링(static)할지 요청 시 렌더링(dynamic)할지 자동으로 판단합니다. 기본은 static이고, `cookies()`, `headers()`, `searchParams` 같은 요청 시점 API나 `cache: 'no-store'`를 쓰거나 `dynamic = 'force-dynamic'`을 선언하면 **라우트 전체**가 dynamic이 됩니다.
+
+가장 흔한 함정은 공통 레이아웃입니다. 헤더에서 로그인 상태를 읽으려고 `cookies()`를 한 번 호출하면 그 아래 페이지가 모두 dynamic이 되고, 정적이어야 할 블로그 글도 매 요청 렌더링됩니다. 이 모델에서 정적 페이지에 사용자별 영역을 넣으려면 그 영역을 Client Component의 클라이언트 fetch로 분리해야 합니다.
+
+`next build` 결과의 기호로 확인합니다. `○`는 Static, `●`는 `generateStaticParams`를 쓴 SSG, `ƒ`는 Dynamic입니다.
+
+| Pages Router                     | App Router                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `getStaticPaths`                 | `generateStaticParams()`                                                       |
+| `fallback: false` / `'blocking'` | `dynamicParams = false` / `true`(기본)                                         |
+| `revalidate: 60`                 | `export const revalidate = 60` 또는 `fetch(url, { next: { revalidate: 60 } })` |
+| `getServerSideProps`             | 요청 시점 API 또는 `dynamic = 'force-dynamic'`                                 |
+| `__NEXT_DATA__`                  | RSC Payload                                                                    |
+
+App Router의 on-demand 재검증은 `revalidatePath`나 `revalidateTag`로 합니다. fetch에 `next: { tags: ['product-42'] }`를 붙여 두면 그 상품이 등장하는 상세, 목록, 홈을 `revalidateTag('product-42', 'max')` 한 번으로 무효화할 수 있습니다. 두 번째 인자는 Next.js 16부터 필요합니다. fetch가 아닌 DB 조회는 `unstable_cache`로 감싸야 같은 캐시를 쓸 수 있습니다.
+
+[Next.js 공식 문서: revalidateTag](https://nextjs.org/docs/app/api-reference/functions/revalidateTag)
+
+## 6. 스트리밍과 상태 코드
+
+`loading.tsx`는 페이지를 자동으로 Suspense로 감싸고, 더 세밀하게는 컴포넌트를 `Suspense`로 직접 감싸 스트리밍합니다.
+
+주의할 점은 스트리밍이 헤더와 상태 코드를 먼저 보낸다는 것입니다. 스트리밍이 시작된 뒤 `notFound()`나 `redirect()`가 실행되면 이미 보낸 200을 404나 307로 바꿀 수 없습니다. 이때 404 화면에는 `noindex`가 붙어 색인은 막히지만, 크롤러가 soft 404로 분류할 수 있습니다. 상태 코드가 중요한 판단은 스트리밍이 시작되기 전에 끝냅니다. `loading.tsx`가 있으면 페이지 본문도 Suspense 안쪽이므로, 필요하면 Proxy에서 확인합니다.
+
+[Next.js 공식 문서: loading.js](https://nextjs.org/docs/app/api-reference/file-conventions/loading)
+
+## 핵심 요약
+
+- Pages Router는 페이지가 export하는 함수로 전략을 정하고, App Router는 Server Component에서 데이터를 조회하며 라우트 단위로 static과 dynamic을 판단합니다.
+- `getServerSideProps`는 클라이언트 내비게이션 때도 실행되고, props는 `__NEXT_DATA__`로 모두 노출됩니다.
+- `'use client'`는 CSR이 아니라 번들 경계 선언이고, 레이아웃의 `cookies()` 한 번은 하위 라우트를 모두 dynamic으로 만듭니다.
+- 스트리밍이 시작된 뒤에는 상태 코드를 바꿀 수 없습니다.
+
+## 마치며
+
+App Router로 오면서 데이터 조회는 컴포넌트 단위가 됐지만, static과 dynamic의 결정은 여전히 라우트 단위입니다. 1편의 결론처럼 전략은 영역마다 달라야 합니다. Next.js의 어떤 API를 만나도 이 기능이 어느 단위에서, 어느 시점의 렌더링을 제어하는지 물으면 의도대로 동작하는지 판단할 수 있습니다.
