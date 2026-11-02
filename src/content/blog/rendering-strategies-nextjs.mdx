@@ -89,7 +89,7 @@ Server Component는 서버에서만 실행되고 JS 번들에 포함되지 않�
 
 App Router는 라우트마다 빌드 시 렌더링(static)할지 요청 시 렌더링(dynamic)할지 자동으로 판단합니다. 기본은 static이고, `cookies()`, `headers()`, `searchParams` 같은 요청 시점 API나 `cache: 'no-store'`를 쓰거나 `dynamic = 'force-dynamic'`을 선언하면 **라우트 전체**가 dynamic이 됩니다.
 
-가장 흔한 함정은 공통 레이아웃입니다. 헤더에서 로그인 상태를 읽으려고 `cookies()`를 한 번 호출하면 그 아래 페이지가 모두 dynamic이 되고, 정적이어야 할 블로그 글도 매 요청 렌더링됩니다. 이 모델에서 정적 페이지에 사용자별 영역을 넣으려면 그 영역을 Client Component의 클라이언트 fetch로 분리해야 합니다.
+가장 흔한 함정은 공통 레이아웃입니다. 헤더에서 로그인 상태를 읽으려고 `cookies()`를 한 번 호출하면 그 아래 페이지가 모두 dynamic이 되고, 정적이어야 할 블로그 글도 매 요청 렌더링됩니다. 정적 페이지에 사용자별 영역을 넣으려면 그 영역을 Client Component의 클라이언트 fetch로 분리해야 합니다.
 
 `next build` 결과의 기호로 확인합니다. `○`는 Static, `●`는 `generateStaticParams`를 쓴 SSG, `ƒ`는 Dynamic입니다.
 
