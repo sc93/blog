@@ -1,0 +1,196 @@
+---
+title: "TanStack Query 안 쓰면 안 돼?"
+description: "서버 컴포넌트와 Server Action이 있는 Next.js App Router에서 TanStack Query가 맡던 역할을 다시 살펴보고, 어디까지 쓰고 어디서 줄일지 판단한 과정을 정리합니다."
+date: "2026-11-03"
+time: "10:41:53"
+category: development
+tags: ['TanStack Query', 'Next.js', 'App Router', '서버 상태', '캐시']
+published: true
+thumbnail: '/images/tanstack-query-app-router.webp'
+---
+
+Next.js App Router에는 이미 서버 컴포넌트, fetch 캐시, `revalidateTag`, Server Action이 있습니다. 그렇다면 TanStack Query를 따로 얹을 필요가 있을까요?
+
+Pages Router에서 습관처럼 쓰던 그대로 App Router에도 가져오면 캐시가 서버와 클라이언트로 나뉘어 무효화를 두 번 관리하게 됩니다. 반대로 무조건 빼면 무한 스크롤과 검색에서 라이브러리가 해 주던 일을 직접 만들게 됩니다. 이 글은 프로젝트를 App Router로 옮기며 둘 사이의 기준을 찾은 기록입니다. Next.js 16과 TanStack Query v5를 기준으로 합니다.
+
+## 1. TanStack Query는 무엇을 해 주나
+
+프론트엔드에서 다루는 상태는 크게 두 가지로 나눌 수 있습니다.
+
+- **클라이언트 상태**: 모달이 열려 있는지, 입력창에 무엇을 썼는지처럼 브라우저 안에서만 존재하는 상태입니다. 주인은 클라이언트이고, 언제나 최신입니다.
+- **서버 상태**: 상품 목록, 유저 정보처럼 원본이 서버에 있는 상태입니다. 클라이언트가 가진 것은 원본의 복사본이라, 다른 사람이나 다른 화면에서 바뀌면 언제든 옛날 데이터가 될 수 있습니다.
+
+서버 상태에는 클라이언트 상태와 다른 고민이 필요합니다. 언제 다시 가져올지, 같은 데이터를 여러 곳에서 요청하면 어떻게 할지, 로딩과 에러는 어떻게 보여 줄지, 데이터를 바꾼 뒤에는 무엇을 다시 가져올지 정해야 합니다.
+
+TanStack Query는 이런 서버 상태 관리를 맡아 주는 라이브러리입니다.
+
+- **캐싱**: queryKey를 기준으로 결과를 저장합니다. 같은 key를 다시 쓰면 저장된 데이터를 바로 보여 줍니다.
+- **중복 요청 제거**: 여러 컴포넌트가 같은 queryKey를 동시에 요청해도 실제 요청은 한 번만 보냅니다.
+- **로딩·에러 상태**: `isPending`, `isError` 같은 상태를 관리해 줍니다.
+- **stale 관리와 재요청**: `staleTime`이 지난 데이터는 stale로 취급합니다. 곧바로 요청하지는 않고, 쿼리가 새로 마운트되거나 창에 다시 포커스되거나 네트워크가 재연결될 때 백그라운드에서 다시 가져옵니다. `staleTime` 기본값은 0입니다.
+- **무효화**: `invalidateQueries`는 캐시를 지우지 않습니다. 대상 쿼리를 stale로 표시하고, 화면에서 쓰는 쿼리는 백그라운드에서 다시 가져옵니다.
+- **페이지네이션과 무한 스크롤**: `useInfiniteQuery`로 페이지 단위 데이터를 이어 붙입니다.
+
+```ts
+const { data, isPending, isError } = useQuery({
+  queryKey: ['products'],
+  queryFn: fetchProducts,
+});
+```
+
+이 몇 줄로 캐싱, 중복 요청 제거, 로딩·에러 처리를 얻습니다. 그래서 React에서 서버 데이터를 다룰 때 거의 기본처럼 쓰여 왔습니다.
+
+[TanStack Query 공식 문서: Important Defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
+
+## 2. Pages Router에서 필요했던 이유
+
+Pages Router에서 서버 데이터는 `getServerSideProps` 같은 페이지 단위 함수에서만 가져올 수 있습니다. 그런데 그 데이터를 쓰는 컴포넌트는 대부분 페이지 깊은 곳에 있습니다. 결국 props를 몇 단계씩 내려야 했고, prop drilling이 생겼습니다.
+
+이 문제를 풀어 준 것이 TanStack Query의 hydration입니다.
+
+```tsx
+// pages/products.tsx
+export const getServerSideProps = async () => {
+  const queryClient = new QueryClient();
+  // 최신 v5에서는 queryClient.query()를 권장합니다
+  await queryClient.prefetchQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
+  return { props: { dehydratedState: dehydrate(queryClient) } };
+};
+
+// pages/_app.tsx
+<QueryClientProvider client={queryClient}>
+  <HydrationBoundary state={pageProps.dehydratedState}>
+    <Component {...pageProps} />
+  </HydrationBoundary>
+</QueryClientProvider>
+
+// 깊은 곳의 컴포넌트
+const { data } = useQuery({ queryKey: ['products'], queryFn: fetchProducts });
+```
+
+서버에서 미리 가져와 캐시에 넣어 두면, 필요한 컴포넌트는 같은 queryKey로 꺼내 쓰기만 하면 됩니다. props로 내려줄 필요가 없어집니다.
+
+[TanStack Query 공식 문서: Server Rendering & Hydration](https://tanstack.com/query/latest/docs/framework/react/guides/ssr)
+
+## 3. 서버 컴포넌트가 직접 가져온다면
+
+App Router에서는 이 구조가 달라집니다. **데이터를 쓰는 컴포넌트가 직접 데이터를 가져옵니다.** 페칭하는 곳과 사용하는 곳이 더 이상 떨어져 있지 않습니다.
+
+```tsx
+// 데이터가 필요한 컴포넌트에서 바로 가져옵니다
+async function ProductList() {
+  const products = await fetchProducts();
+  return <ul>{/* ... */}</ul>;
+}
+```
+
+prop drilling의 원인이 사라집니다. 하지만 여러 컴포넌트가 각자 같은 데이터를 요청하면 요청이 중복되지 않을까요?
+
+이 문제는 **Request Memoization**이 해결합니다. 서버 렌더링 한 번 안에서는 URL과 옵션이 같은 `GET` `fetch`를 여러 번 호출해도 실제 요청은 한 번만 나갑니다. DB 직접 조회처럼 `fetch`가 아닌 방식이라면 React의 `cache()`로 감싸 같은 효과를 얻습니다.
+
+<Callout type="note" title="Data Cache와의 차이">
+  Request Memoization은 한 번의 렌더링 동안만 유지됩니다. 여러 요청에 걸쳐
+  유지되는 Data Cache(`revalidateTag`로 무효화하는 그 캐시)와는 다른 개념입니다.
+</Callout>
+
+정리하면 Pages Router에서 TanStack Query로 해결하던 prop drilling과 서버 렌더링의 중복 요청은 App Router에서 **프레임워크가 대신 해결합니다.** 다만 Request Memoization은 서버 렌더링에만 적용되므로, 브라우저에서 보내는 요청의 중복까지 막아 주지는 않습니다.
+
+[Next.js 공식 문서: fetch](https://nextjs.org/docs/app/api-reference/functions/fetch#memoization)
+
+## 4. 함께 쓰면 캐시는 누가 관리할까
+
+Pages Router에서 App Router로 마이그레이션한 프로젝트에서는 TanStack Query를 같이 사용했습니다. 그러자 캐시를 관리하는 곳이 둘로 나뉘었습니다.
+
+- **서버**: Next.js Data Cache
+- **클라이언트**: TanStack Query 캐시
+
+두 캐시는 서로를 모릅니다. 그래서 뮤테이션 후에는 양쪽을 모두 무효화해야 합니다.
+
+```ts
+// 서버: Server Action 안에서
+updateTag('products');
+
+// 클라이언트: 뮤테이션 성공 후
+queryClient.invalidateQueries({ queryKey: ['products'] });
+```
+
+하나라도 빠뜨리면 화면 일부만 옛날 데이터로 남습니다. 예제의 `updateTag`는 Server Action에서 바뀐 값을 바로 보여 줄 때 쓰는 함수입니다. `revalidateTag(tag, 'max')`는 다음 요청에 옛 데이터를 먼저 응답합니다.
+
+이 둘을 하나의 함수로 묶고 싶었지만, `updateTag`는 서버에서, `invalidateQueries`는 클라이언트의 QueryClient에서 호출합니다. `useMutation`으로 Server Action 호출과 `invalidateQueries`를 한 훅에 모을 수는 있어도, 서버의 태그와 클라이언트의 queryKey는 여전히 따로 적어야 합니다. **결국 뮤테이션마다 무효화 대상을 두 곳에서 맞춰야 했습니다.**
+
+공식 문서도 같은 데이터를 서버 컴포넌트와 클라이언트 컴포넌트에 함께 렌더링하면 어긋날 수 있다고 경고합니다. TanStack Query는 클라이언트에서 데이터를 다시 가져올 수 있어도 서버 컴포넌트를 다시 렌더링하지는 못하기 때문입니다.
+
+캐시의 주인이 둘이 되는 순간, 관리해야 할 것도 두 배가 됩니다. 같이 쓰는 것이 오히려 부담이었습니다.
+
+[TanStack Query 공식 문서: Data ownership and revalidation](https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr#data-ownership-and-revalidation)
+
+[Next.js 공식 문서: updateTag](https://nextjs.org/docs/app/api-reference/functions/updateTag)
+
+## 5. 일단 빼 보니 생긴 일
+
+새 프로젝트를 App Router로 시작하면서 TanStack Query는 **필요해질 때까지 쓰지 않기로** 했습니다.
+
+대부분의 화면은 서버 컴포넌트에서 데이터를 가져오고, 뮤테이션은 Server Action과 태그 무효화로 처리했습니다. 직접 관리할 캐시가 서버 한 곳뿐이니 무효화도 한 번이면 끝났습니다.
+
+그런데 스크롤과 입력에 맞춰 **클라이언트에서 직접 데이터를 가져와야 하는 화면**이 생겼습니다. 서버 컴포넌트는 브라우저 이벤트에 직접 반응하지 않고, 서버 캐시는 브라우저의 요청 상태까지 관리해 주지 않습니다. 검색은 URL 쿼리로 서버 컴포넌트를 다시 렌더링할 수도 있지만, 입력하는 대로 결과를 보여 주는 화면에서는 클라이언트에서 직접 다루는 쪽을 택했습니다.
+
+### 무한 스크롤
+
+스크롤이 끝에 닿을 때마다 다음 페이지를 불러와 기존 목록 뒤에 이어 붙여야 합니다. 다음 페이지 커서, 더 불러올 데이터가 있는지, 지금 불러오는 중인지를 전부 `useState`로 직접 관리했습니다. 빠르게 스크롤하면 **같은 페이지를 중복으로 요청하는 문제**도 있었습니다.
+
+`useInfiniteQuery`를 쓰면 이 상태 관리를 라이브러리에 맡길 수 있습니다.
+
+```ts
+const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery({
+  queryKey: ['products'],
+  queryFn: ({ pageParam }) => fetchProducts(pageParam),
+  initialPageParam: 0,
+  getNextPageParam: (lastPage) => lastPage.nextCursor,
+});
+
+const handleReachEnd = () => {
+  if (hasNextPage && !isFetching) fetchNextPage();
+};
+```
+
+호출 조건은 여전히 직접 지켜야 합니다. 무한 쿼리는 모든 페이지가 캐시 항목 하나를 공유해 동시에 하나의 요청만 진행할 수 있으므로, 공식 문서도 스크롤처럼 사용자가 직접 제어하지 않는 호출에는 `isFetching` 확인을 권장합니다.
+
+[TanStack Query 공식 문서: Infinite Queries](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
+
+### 입력하는 대로 보여 주는 검색
+
+입력할 때마다 요청을 보내면 너무 많아서 debounce를 걸어야 했습니다.
+
+빠르게 입력하면 응답이 요청 순서대로 오지 않아, **이전 검색어의 결과가 나중에 도착해 화면을 덮어쓰는 문제(race condition)** 도 있었습니다. 같은 검색어를 다시 입력해도 매번 새로 요청했습니다.
+
+```ts
+const debouncedKeyword = useDebouncedValue(keyword, 300); // 직접 만든 훅
+
+const { data } = useQuery({
+  queryKey: ['search', debouncedKeyword],
+  queryFn: () => searchProducts(debouncedKeyword),
+  enabled: debouncedKeyword.length > 0,
+  staleTime: 60_000,
+});
+```
+
+검색어를 queryKey에 넣으면 결과가 검색어별로 저장되고, 화면은 현재 key의 결과만 읽습니다. 이전 검색어의 응답이 늦게 도착해도 현재 화면을 덮어쓰지 않습니다. 같은 검색어를 다시 입력하면 저장된 결과를 바로 보여 주고, `staleTime` 안이면 요청도 보내지 않습니다. `staleTime`을 설정하지 않으면 저장된 결과를 보여 준 뒤 백그라운드에서 다시 요청합니다. debounce는 TanStack Query가 대신해 주지 않으므로 그대로 필요합니다.
+
+두 경우 모두 **TanStack Query가 해 주던 일을 손으로 다시 만들고 있었습니다.**
+
+## 6. 그래서, 안 쓰면 안 돼?
+
+서버에서 가져오는 데이터라면 TanStack Query가 해결하던 prop drilling과 중복 요청을 서버 컴포넌트가 대신 해결합니다. 오히려 모든 곳에 쓰면 캐시가 두 곳으로 나뉘어 무효화를 이중으로 관리해야 합니다.
+
+그래서 기본은 서버 컴포넌트와 Server Action으로 가고, **무한 스크롤과 실시간 검색처럼 클라이언트에서 직접 데이터를 가져와야 하는 곳에만 TanStack Query를 최소한으로 썼습니다.** TanStack Query로 가져오는 데이터는 서버 캐시와 겹치지 않게 했고, 덕분에 이중 무효화는 피할 수 있었습니다.
+
+하지만 **캐시가 서버와 클라이언트에 따로 존재한다는 문제 자체가 해결된 것은 아닙니다.** 쓰는 범위를 줄였을 뿐입니다. 같은 데이터가 양쪽 화면에 함께 나타나기 시작하면 이중 무효화는 언제든 다시 돌아옵니다.
+
+그래서 지금의 답은 이렇습니다.
+
+<Callout type="info" title="지금의 답">
+  **안 쓸 수는 없었습니다. 다만 꼭 필요한 곳에만, 최소한으로 쓰고 있습니다.**
+</Callout>
