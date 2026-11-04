@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1390" height="520" viewBox="0 0 1390 520" font-family="Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif">
+<rect width="1390" height="520" fill="#FFFFFF"/>
+<text x="245" y="46" font-size="20" fill="#2563EB" font-weight="700" text-anchor="middle">DOM</text>
+<text x="700" y="46" font-size="20" fill="#7C3AED" font-weight="700" text-anchor="middle">CSSOM</text>
+<text x="1150" y="46" font-size="20" fill="#0F766E" font-weight="700" text-anchor="middle">Render Tree</text>
+<text x="475" y="245" font-size="40" fill="#6B7280" font-weight="700" text-anchor="middle">+</text>
+<text x="925" y="245" font-size="40" fill="#6B7280" font-weight="700" text-anchor="middle">→</text>
+<path d="M245 122 L120 168" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M245 122 L330 168" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M330 212 L230 258" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M330 212 L330 258" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M330 212 L430 258" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M330 302 L330 348" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<rect x="199.0" y="78.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="245.0" y="106.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">html</text>
+<rect x="74.0" y="168.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="120.0" y="196.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">head</text>
+<rect x="284.0" y="168.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="330.0" y="196.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">body</text>
+<rect x="184.0" y="258.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="230.0" y="286.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">h1</text>
+<rect x="284.0" y="258.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="330.0" y="286.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">p</text>
+<rect x="384.0" y="258.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="430.0" y="286.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">div.ad</text>
+<rect x="284.0" y="348.0" width="92" height="44" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="330.0" y="376.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">span</text>
+<path d="M700 146 L575 214" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M700 146 L700 214" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M700 146 L830 214" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M700 266 L700 334" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<rect x="625.0" y="94.0" width="150" height="52" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="700.0" y="116.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">body</text><text x="700.0" y="138.0" text-anchor="middle" font-size="13" fill="#6B7280">font-size: 16px</text>
+<rect x="527.0" y="214.0" width="96" height="52" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="575.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">h1</text><text x="575.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">2em</text>
+<rect x="648.0" y="214.0" width="104" height="52" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="700.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">p</text><text x="700.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">color: #333</text>
+<rect x="775.0" y="214.0" width="110" height="52" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="830.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">.ad</text><text x="830.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">display: none</text>
+<rect x="652.0" y="334.0" width="96" height="52" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="700.0" y="356.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">span</text><text x="700.0" y="378.0" text-anchor="middle" font-size="13" fill="#6B7280">bold</text>
+<path d="M1150 146 L1030 214" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M1150 146 L1150 214" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<path d="M1150 146 L1280 214" fill="none" stroke="#D1D5DB" stroke-width="1.6" stroke-dasharray="6 5"/>
+<path d="M1150 266 L1150 334" fill="none" stroke="#9CA3AF" stroke-width="1.6"/>
+<rect x="1095.0" y="94.0" width="110" height="52" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/><text x="1150.0" y="116.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F766E">body</text><text x="1150.0" y="138.0" text-anchor="middle" font-size="13" fill="#6B7280">16px</text>
+<rect x="982.0" y="214.0" width="96" height="52" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/><text x="1030.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F766E">h1</text><text x="1030.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">32px</text>
+<rect x="1102.0" y="214.0" width="96" height="52" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/><text x="1150.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F766E">p</text><text x="1150.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">#333</text>
+<rect x="1230.0" y="214.0" width="100" height="52" rx="10" fill="#F9FAFB" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 5"/><text x="1280.0" y="236.0" text-anchor="middle" font-size="15" font-weight="700" fill="#9CA3AF">div.ad</text><text x="1280.0" y="258.0" text-anchor="middle" font-size="13" fill="#6B7280">제외</text>
+<text x="1280" y="206" font-size="22" fill="#DC2626" font-weight="700" text-anchor="middle">✕</text>
+<rect x="1102.0" y="334.0" width="96" height="52" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/><text x="1150.0" y="356.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F766E">span</text><text x="1150.0" y="378.0" text-anchor="middle" font-size="13" fill="#6B7280">bold</text>
+<path d="M40 430 H1350" fill="none" stroke="#E5E7EB" stroke-width="1.5"/>
+<text x="40" y="466" font-size="15" fill="#1F2937" font-weight="400" text-anchor="start">• head, script처럼 화면에 보이지 않는 요소와 display: none 요소는 Render Tree에서 빠진다.</text>
+<text x="40" y="494" font-size="15" fill="#1F2937" font-weight="400" text-anchor="start">• visibility: hidden 요소는 보이지 않아도 자리를 차지하므로 Render Tree에 포함된다.</text>
+</svg>
