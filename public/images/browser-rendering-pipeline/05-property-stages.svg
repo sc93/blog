@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="450" viewBox="0 0 1400 450" font-family="Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/>
+  </marker>
+</defs>
+<rect width="1400" height="450" fill="#FFFFFF"/>
+<text x="475.0" y="50" font-size="17" fill="#475569" font-weight="700" text-anchor="middle">Style</text>
+<text x="665.0" y="50" font-size="17" fill="#7C3AED" font-weight="700" text-anchor="middle">Layout</text>
+<text x="855.0" y="50" font-size="17" fill="#16A34A" font-weight="700" text-anchor="middle">Paint</text>
+<text x="1045.0" y="50" font-size="17" fill="#0891B2" font-weight="700" text-anchor="middle">Composite</text>
+<text x="1260" y="50" font-size="17" fill="#1F2937" font-weight="700" text-anchor="middle">비용</text>
+<text x="40" y="108" font-size="16" fill="#1F2937" font-weight="700" text-anchor="start">width, height, top, left, margin</text>
+<text x="40" y="132" font-size="13" fill="#6B7280" font-weight="400" text-anchor="start">크기·위치(기하) 속성</text>
+<rect x="400" y="80" width="150" height="64" rx="10" fill="#F1F5F9" stroke="#475569" stroke-width="2"/><text x="475.0" y="118.0" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">Style</text>
+<path d="M554 112 H586" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="590" y="80" width="150" height="64" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="665.0" y="118.0" text-anchor="middle" font-size="16" font-weight="700" fill="#7C3AED">Layout</text>
+<path d="M744 112 H776" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="780" y="80" width="150" height="64" rx="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/><text x="855.0" y="118.0" text-anchor="middle" font-size="16" font-weight="700" fill="#16A34A">Paint</text>
+<path d="M934 112 H966" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="970" y="80" width="150" height="64" rx="10" fill="#CFFAFE" stroke="#0891B2" stroke-width="2"/><text x="1045.0" y="118.0" text-anchor="middle" font-size="16" font-weight="700" fill="#0891B2">Composite</text>
+<text x="1260" y="118" font-size="17" fill="#DC2626" font-weight="700" text-anchor="middle">가장 비쌈</text>
+<text x="40" y="208" font-size="16" fill="#1F2937" font-weight="700" text-anchor="start">color, background, box-shadow</text>
+<text x="40" y="232" font-size="13" fill="#6B7280" font-weight="400" text-anchor="start">색·그림자 등 시각 속성</text>
+<rect x="400" y="180" width="150" height="64" rx="10" fill="#F1F5F9" stroke="#475569" stroke-width="2"/><text x="475.0" y="218.0" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">Style</text>
+<path d="M554 212 H586" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="590" y="180" width="150" height="64" rx="10" fill="#F9FAFB" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 5"/><text x="665.0" y="218.0" text-anchor="middle" font-size="15" font-weight="700" fill="#9CA3AF">건너뜀</text>
+<path d="M744 212 H776" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="780" y="180" width="150" height="64" rx="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/><text x="855.0" y="218.0" text-anchor="middle" font-size="16" font-weight="700" fill="#16A34A">Paint</text>
+<path d="M934 212 H966" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="970" y="180" width="150" height="64" rx="10" fill="#CFFAFE" stroke="#0891B2" stroke-width="2"/><text x="1045.0" y="218.0" text-anchor="middle" font-size="16" font-weight="700" fill="#0891B2">Composite</text>
+<text x="1260" y="218" font-size="17" fill="#D97706" font-weight="700" text-anchor="middle">중간</text>
+<text x="40" y="308" font-size="16" fill="#1F2937" font-weight="700" text-anchor="start">transform, opacity</text>
+<text x="40" y="332" font-size="13" fill="#6B7280" font-weight="400" text-anchor="start">합성 단계에서 처리되는 속성</text>
+<rect x="400" y="280" width="150" height="64" rx="10" fill="#F1F5F9" stroke="#475569" stroke-width="2"/><text x="475.0" y="318.0" text-anchor="middle" font-size="16" font-weight="700" fill="#475569">Style</text>
+<path d="M554 312 H586" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="590" y="280" width="150" height="64" rx="10" fill="#F9FAFB" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 5"/><text x="665.0" y="318.0" text-anchor="middle" font-size="15" font-weight="700" fill="#9CA3AF">건너뜀</text>
+<path d="M744 312 H776" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="780" y="280" width="150" height="64" rx="10" fill="#F9FAFB" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 5"/><text x="855.0" y="318.0" text-anchor="middle" font-size="15" font-weight="700" fill="#9CA3AF">건너뜀</text>
+<path d="M934 312 H966" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="970" y="280" width="150" height="64" rx="10" fill="#CFFAFE" stroke="#0891B2" stroke-width="2"/><text x="1045.0" y="318.0" text-anchor="middle" font-size="16" font-weight="700" fill="#0891B2">Composite</text>
+<text x="1260" y="318" font-size="17" fill="#16A34A" font-weight="700" text-anchor="middle">가장 저렴</text>
+<path d="M40 392 H1360" fill="none" stroke="#E5E7EB" stroke-width="1.5"/>
+<text x="40" y="424" font-size="14" fill="#6B7280" font-weight="400" text-anchor="start">transform·opacity 애니메이션은 별도 레이어로 분리되면 Layout과 Paint를 건너뛰고, 메인 스레드가 아닌 컴포지터 스레드에서 처리될 수 있다.</text>
+</svg>

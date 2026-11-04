@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="460" viewBox="0 0 1290 460" font-family="Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/>
+  </marker>
+  <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#EA580C"/>
+  </marker>
+</defs>
+<rect width="1290" height="460" fill="#FFFFFF"/>
+<rect x="40" y="40" width="120" height="72" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="100.0" y="82.0" text-anchor="middle" font-size="18" font-weight="700" fill="#2563EB">HTML</text>
+<rect x="220" y="40" width="130" height="72" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/><text x="285.0" y="72.0" text-anchor="middle" font-size="18" font-weight="700" fill="#2563EB">DOM</text><text x="285.0" y="94.0" text-anchor="middle" font-size="13" fill="#6B7280">문서 구조</text>
+<rect x="40" y="200" width="120" height="72" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="100.0" y="242.0" text-anchor="middle" font-size="18" font-weight="700" fill="#7C3AED">CSS</text>
+<rect x="220" y="200" width="130" height="72" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/><text x="285.0" y="232.0" text-anchor="middle" font-size="18" font-weight="700" fill="#7C3AED">CSSOM</text><text x="285.0" y="254.0" text-anchor="middle" font-size="13" fill="#6B7280">스타일 규칙</text>
+<path d="M160 76 H216" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M160 236 H216" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M350 76 H390 V156" fill="none" stroke="#9CA3AF" stroke-width="2"/>
+<path d="M350 236 H390 V156" fill="none" stroke="#9CA3AF" stroke-width="2"/>
+<path d="M390 156 H426" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="430" y="120" width="150" height="72" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/><text x="505.0" y="152.0" text-anchor="middle" font-size="18" font-weight="700" fill="#0F766E">Render Tree</text><text x="505.0" y="174.0" text-anchor="middle" font-size="13" fill="#6B7280">보이는 요소만</text>
+<rect x="630" y="120" width="130" height="72" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="695.0" y="152.0" text-anchor="middle" font-size="18" font-weight="700" fill="#7C3AED">Layout</text><text x="695.0" y="174.0" text-anchor="middle" font-size="13" fill="#6B7280">위치·크기 계산</text>
+<rect x="800" y="120" width="130" height="72" rx="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/><text x="865.0" y="152.0" text-anchor="middle" font-size="18" font-weight="700" fill="#16A34A">Paint</text><text x="865.0" y="174.0" text-anchor="middle" font-size="13" fill="#6B7280">픽셀 채우기</text>
+<rect x="970" y="120" width="150" height="72" rx="10" fill="#CFFAFE" stroke="#0891B2" stroke-width="2"/><text x="1045.0" y="152.0" text-anchor="middle" font-size="18" font-weight="700" fill="#0891B2">Composite</text><text x="1045.0" y="174.0" text-anchor="middle" font-size="13" fill="#6B7280">레이어 합성</text>
+<path d="M580 156 H626" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M760 156 H796" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M930 156 H966" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M1120 156 H1156" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="1160" y="120" width="90" height="72" rx="10" fill="#F1F5F9" stroke="#475569" stroke-width="2"/><text x="1205.0" y="162.0" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">화면</text>
+<rect x="220" y="340" width="130" height="72" rx="10" fill="#FFF7ED" stroke="#EA580C" stroke-width="2"/><text x="285.0" y="372.0" text-anchor="middle" font-size="18" font-weight="700" fill="#EA580C">JavaScript</text><text x="285.0" y="394.0" text-anchor="middle" font-size="13" fill="#6B7280">DOM·CSSOM 조작</text>
+<path d="M220 376 H190 V88" fill="none" stroke="#EA580C" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrO)"/>
+<text x="40" y="368" font-size="13" fill="#EA580C" font-weight="700" text-anchor="start">&lt;script&gt;를 만나면</text>
+<text x="40" y="388" font-size="13" fill="#EA580C" font-weight="700" text-anchor="start">HTML 파싱 중단</text>
+<rect x="263.0" y="120" width="44" height="22" rx="11" fill="#1F2937"/><text x="285" y="136" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-1</text>
+<rect x="263.0" y="280" width="44" height="22" rx="11" fill="#1F2937"/><text x="285" y="296" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-2</text>
+<rect x="483.0" y="200" width="44" height="22" rx="11" fill="#1F2937"/><text x="505" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-2</text>
+<rect x="263.0" y="420" width="44" height="22" rx="11" fill="#1F2937"/><text x="285" y="436" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-3</text>
+<rect x="673.0" y="200" width="44" height="22" rx="11" fill="#1F2937"/><text x="695" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-4</text>
+<rect x="928.0" y="200" width="44" height="22" rx="11" fill="#1F2937"/><text x="950" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">2-5</text>
+<path d="M640 250 H1240" fill="none" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="940" y="274" font-size="13" fill="#6B7280" font-weight="400" text-anchor="middle">스타일이 바뀌면 이 구간이 다시 실행될 수 있다</text>
+</svg>

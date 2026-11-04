@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" font-family="Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/>
+  </marker>
+</defs>
+<rect width="1280" height="360" fill="#FFFFFF"/>
+<text x="40" y="82" font-size="17" fill="#1F2937" font-weight="700" text-anchor="start">읽기·쓰기를 번갈아 할 때</text>
+<text x="40" y="108" font-size="16" fill="#DC2626" font-weight="700" text-anchor="start">→ Layout 3회</text>
+<rect x="300" y="60" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="348.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="348.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="406" y="60" width="96" height="56" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="454.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">Layout</text><text x="454.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">강제 실행</text>
+<rect x="512" y="60" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="560.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="560.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<rect x="618" y="60" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="666.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="666.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="724" y="60" width="96" height="56" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="772.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">Layout</text><text x="772.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">강제 실행</text>
+<rect x="830" y="60" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="878.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="878.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<rect x="936" y="60" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="984.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="984.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="1042" y="60" width="96" height="56" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="1090.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">Layout</text><text x="1090.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">강제 실행</text>
+<rect x="1148" y="60" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="1196.0" y="84.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="1196.0" y="106.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<text x="40" y="222" font-size="17" fill="#1F2937" font-weight="700" text-anchor="start">읽기를 모은 뒤 쓰기</text>
+<text x="40" y="248" font-size="16" fill="#16A34A" font-weight="700" text-anchor="start">→ Layout 1회</text>
+<rect x="300" y="200" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="348.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="348.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<rect x="406" y="200" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="454.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="454.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<rect x="512" y="200" width="96" height="56" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/><text x="560.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#2563EB">읽기</text><text x="560.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">offsetHeight</text>
+<rect x="618" y="200" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="666.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="666.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="724" y="200" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="772.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="772.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="830" y="200" width="96" height="56" rx="10" fill="#FFEDD5" stroke="#EA580C" stroke-width="2"/><text x="878.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#EA580C">쓰기</text><text x="878.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">width</text>
+<rect x="1148" y="200" width="96" height="56" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/><text x="1196.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#7C3AED">Layout</text><text x="1196.0" y="246.0" text-anchor="middle" font-size="13" fill="#6B7280">프레임당 1회</text>
+<path d="M940 228 H1142" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M40 300 H1240" fill="none" stroke="#E5E7EB" stroke-width="1.5"/>
+<text x="40" y="334" font-size="14" fill="#6B7280" font-weight="400" text-anchor="start">레이아웃 정보를 읽는 속성(offsetHeight, getBoundingClientRect 등)은 최신 값을 돌려주려고, 직전에 바뀐 스타일이 있으면 Layout을 즉시 실행한다.</text>
+</svg>
