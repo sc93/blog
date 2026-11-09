@@ -9,8 +9,6 @@ published: true
 thumbnail: '/images/nestjs-model-dto.svg'
 ---
 
-> NestJS로 게시글 API를 구현하면서 요청 데이터와 애플리케이션 내부 데이터의 구조를 어떻게 구분할지 정리했습니다. 이번 글에서는 Model과 DTO의 기본적인 역할만 살펴보고, 실제 입력값 검증은 다음 편에서 다룹니다.
-
 ## 1. Model과 DTO는 왜 구분할까?
 
 게시글 생성 요청에는 보통 <code>title</code>과 <code>description</code>이 필요합니다. 하지만 서버에서 관리하는 게시글 데이터에는 <code>id</code>도 포함될 수 있습니다.
