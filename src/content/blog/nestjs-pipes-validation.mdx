@@ -1,0 +1,160 @@
+---
+title: "NestJS Pipe — 요청 데이터 변환과 검증"
+description: "ParseIntPipe와 ValidationPipe를 이용해 요청 데이터를 변환하고 DTO 검증 규칙을 적용하는 방법을 정리합니다."
+date: "2026-11-09"
+time: "17:00:03"
+category: development
+tags: ['NestJS', 'TypeScript', '백엔드']
+published: true
+thumbnail: '/images/nestjs-pipes-validation.svg'
+---
+
+> NestJS에서 DTO를 정의해도 실제 HTTP 요청 데이터가 자동으로 검증되지는 않습니다. 이번 글에서는 게시글 생성 API에 Pipe를 적용해 요청 데이터를 변환하고 검증하는 방법을 정리합니다.
+
+## 1. Pipe란?
+
+Pipe는 Controller의 라우트 핸들러가 실행되기 전에 요청 인자를 처리하는 기능입니다. 주로 다음 두 가지 목적으로 사용합니다.
+
+- <b>변환(Transformation)</b>: 문자열 등으로 전달된 값을 필요한 타입으로 변환합니다.
+- <b>검증(Validation)</b>: 전달된 값이 정해진 조건을 만족하는지 확인하고, 조건을 만족하지 않으면 요청을 거부합니다.
+
+NestJS에는 <code>ParseIntPipe</code>, <code>ValidationPipe</code> 등 여러 Pipe가 제공됩니다.
+
+## 2. 경로 파라미터 변환: ParseIntPipe
+
+URL 경로의 파라미터는 기본적으로 문자열로 전달됩니다. 게시글 ID를 숫자로 사용하려면 다음과 같이 작성할 수 있습니다.
+
+```ts
+@Get(':id')
+getBoardById(@Param('id', ParseIntPipe) id: number) {
+  return this.boardsService.getBoardById(id);
+}
+```
+
+<code>GET /boards/10</code> 요청에서는 <code>id</code>가 숫자 <code>10</code>으로 변환됩니다. <code>GET /boards/abc</code>처럼 숫자로 변환할 수 없는 값이 들어오면 기본적으로 400 Bad Request 응답을 반환합니다.
+
+## 3. DTO 검증을 위한 패키지 설치
+
+요청 본문을 검증하려면 <code>class-validator</code>와 <code>class-transformer</code>를 설치합니다.
+
+```bash
+pnpm add class-validator class-transformer
+```
+
+- <code>class-validator</code>: DTO 필드에 검증 규칙을 선언합니다.
+- <code>class-transformer</code>: 일반 객체를 클래스 인스턴스로 변환하는 등의 작업을 지원합니다.
+
+## 4. CreateBoardDto에 검증 규칙 추가하기
+
+3편에서 정의한 DTO에 데코레이터를 추가합니다.
+
+```ts
+// dto/create-board.dto.ts
+import { IsNotEmpty, IsString } from 'class-validator';
+
+export class CreateBoardDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
+```
+
+- <code>@IsString()</code>: 값이 문자열인지 확인합니다.
+- <code>@IsNotEmpty()</code>: 빈 문자열 등 비어 있는 값인지 확인합니다.
+
+이 데코레이터만 추가해서는 요청이 자동으로 검증되지 않습니다. <code>ValidationPipe</code>도 적용해야 합니다.
+
+## 5. ValidationPipe 적용하기
+
+모든 API 요청에 공통으로 적용하려면 <code>main.ts</code>에서 전역 Pipe를 설정할 수 있습니다.
+
+```ts
+// main.ts
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+설정 옵션의 의미는 다음과 같습니다.
+
+- <code>whitelist: true</code>: 검증 데코레이터가 없는 속성을 제거합니다.
+- <code>forbidNonWhitelisted: true</code>: <code>whitelist</code>에서 허용하지 않은 속성이 들어오면 제거하는 대신 오류를 반환합니다.
+- <code>transform: true</code>: 요청 데이터를 DTO 클래스 인스턴스 등으로 변환할 수 있게 합니다. 일부 기본 타입의 경로·쿼리 파라미터 변환도 지원합니다.
+
+<code>transform: true</code>만 설정했다고 모든 필드가 기대한 타입으로 안전하게 변환되는 것은 아닙니다. 입력 검증 규칙을 함께 작성해야 합니다.
+
+## 6. Controller에서 검증된 요청 사용하기
+
+```ts
+@Post()
+createBoard(@Body() createBoardDto: CreateBoardDto) {
+  return this.boardsService.createBoard(createBoardDto);
+}
+```
+
+전역 <code>ValidationPipe</code>를 설정하면 <code>@Body()</code>로 받은 데이터가 DTO의 검증 규칙에 따라 검사됩니다.
+
+정상적인 요청 예시는 다음과 같습니다.
+
+```json
+{
+  "title": "NestJS 학습",
+  "description": "Pipe 적용하기"
+}
+```
+
+반면 아래처럼 제목이 비어 있거나 허용되지 않은 필드가 포함되면 기본적으로 400 Bad Request 응답이 발생합니다.
+
+```json
+{
+  "title": "",
+  "description": "Pipe 적용하기",
+  "admin": true
+}
+```
+
+실패한 요청은 Controller 메서드까지 전달되지 않습니다.
+
+## 7. TypeScript 타입과 런타임 검증의 차이
+
+```ts
+createBoard(@Body() dto: CreateBoardDto)
+```
+
+여기서 <code>CreateBoardDto</code> 타입을 지정했다고 해서 외부 클라이언트가 올바른 값을 보낸다는 보장은 없습니다. TypeScript의 타입 검사는 컴파일 단계에서 수행되며, HTTP 요청은 실행 중에 들어오기 때문입니다.
+
+따라서 외부 입력은 <b>DTO에 검증 규칙을 선언하고 ValidationPipe로 런타임에 확인</b>하는 방식이 필요합니다.
+
+## 8. 정리
+
+- Pipe는 Controller 핸들러 실행 전에 요청 인자를 변환하거나 검증합니다.
+- <code>ParseIntPipe</code>는 경로 파라미터를 숫자로 변환하고 실패 시 요청을 거부합니다.
+- <code>class-validator</code>로 DTO에 검증 규칙을 선언할 수 있습니다.
+- <code>ValidationPipe</code>를 적용해야 실제 요청값에 검증 규칙이 실행됩니다.
+- <code>whitelist</code>, <code>forbidNonWhitelisted</code>, <code>transform</code> 옵션으로 요청 처리 방식을 설정할 수 있습니다.
+- TypeScript의 타입 선언과 런타임 입력 검증은 별개의 작업입니다.
+
+### 참고
+
+- [NestJS Pipes](https://docs.nestjs.com/pipes)
+- [NestJS Validation](https://docs.nestjs.com/techniques/validation)

@@ -1,0 +1,171 @@
+---
+title: "NestJS 시작하기 — 프로젝트 구조와 동작 흐름"
+description: "Nest CLI로 프로젝트를 생성하고 기본 파일 구조와 HTTP 요청 처리 흐름을 살펴봅니다."
+date: "2026-11-09"
+time: "17:00:00"
+category: development
+tags: ['NestJS', 'TypeScript', '백엔드']
+published: true
+thumbnail: '/images/nestjs-getting-started.svg'
+---
+
+> 이 글은 NestJS를 처음 학습하며 프로젝트의 기본 구조와 HTTP 요청 처리 흐름을 복습하기 위해 작성한 초안입니다. Module, Controller, Provider와 DI의 자세한 내용은 다음 편에서 다룹니다.
+
+## 1. NestJS란?
+
+NestJS는 Node.js 환경에서 서버 사이드 애플리케이션을 개발하기 위한 프레임워크입니다. TypeScript를 기본적으로 지원하며 Module, Controller, Provider와 의존성 주입(DI)을 활용해 애플리케이션을 일관된 구조로 구성할 수 있습니다.
+
+Express에서도 라우팅과 비즈니스 로직을 분리할 수 있습니다. 다만 Express는 구성 방식의 자유도가 높은 반면, NestJS는 역할별 구성 요소와 개발 패턴을 제공한다는 차이가 있습니다. NestJS는 기본적으로 Express를 HTTP 플랫폼으로 사용할 수도 있으므로, 두 기술이 완전히 대립하는 것은 아닙니다.
+
+## 2. Nest CLI로 프로젝트 생성
+
+```bash
+pnpm add -g @nestjs/cli
+nest new nest-study --package-manager pnpm
+cd nest-study
+pnpm run start:dev
+```
+
+CLI는 초기 프로젝트와 필요한 의존성을 구성합니다. 생성 과정의 모듈 시스템, 테스트 러너, 모니터링 설정 등은 선택에 따라 달라질 수 있습니다. 개발 모드로 실행하면 파일 변경을 감지해 서버를 다시 실행합니다.
+
+## 3. 기본 프로젝트 구조
+
+```txt
+src/
+├── main.ts
+├── app.module.ts
+├── app.controller.ts
+├── app.service.ts
+└── app.controller.spec.ts
+```
+
+| 파일                                | 역할                                     |
+| ----------------------------------- | ---------------------------------------- |
+| <code>main.ts</code>                | 애플리케이션 초기화 및 실행 진입점       |
+| <code>app.module.ts</code>          | 애플리케이션의 루트 모듈                 |
+| <code>app.controller.ts</code>      | HTTP 요청을 받는 기본 Controller         |
+| <code>app.service.ts</code>         | Controller가 호출할 수 있는 기본 Service |
+| <code>app.controller.spec.ts</code> | Controller의 테스트 코드                 |
+
+프로젝트 규모가 커지면 기능별로 별도의 모듈과 디렉터리를 구성할 수 있습니다.
+
+## 4. 애플리케이션은 어떻게 시작될까?
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module.js';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+<code>NestFactory.create(AppModule)</code>은 루트 모듈을 시작으로 모듈과 의존성 관계를 분석하고 애플리케이션 인스턴스를 생성합니다. 이후 <code>app.listen(3000)</code>이 HTTP 서버를 실행해 3000번 포트에서 요청을 받도록 합니다.
+
+<code>AppModule</code>은 애플리케이션의 시작점이 되는 루트 모듈입니다.
+
+```ts
+import { Module } from '@nestjs/common';
+import { BoardsModule } from './boards/boards.module.js';
+
+@Module({
+  imports: [BoardsModule],
+})
+export class AppModule {}
+```
+
+<code>imports</code>는 다른 모듈을 가져올 때 사용합니다. <code>controllers</code>는 현재 모듈의 Controller를, <code>providers</code>는 현재 모듈에서 관리할 Provider를 등록합니다. 세 속성은 모두 같은 의미의 '의존성 추가'가 아닙니다.
+
+## 5. GET /boards 요청 처리 흐름
+
+다음은 게시글 목록을 반환하는 간단한 예제입니다.
+
+<b>boards.service.ts</b>
+
+```ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class BoardsService {
+  getBoards() {
+    return [
+      { id: 1, title: '첫 번째 게시글' },
+      { id: 2, title: '두 번째 게시글' },
+    ];
+  }
+}
+```
+
+<b>boards.controller.ts</b>
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { BoardsService } from './boards.service.js';
+
+@Controller('boards')
+export class BoardsController {
+  constructor(
+    private readonly boardsService: BoardsService,
+  ) {}
+
+  @Get()
+  getBoards() {
+    return this.boardsService.getBoards();
+  }
+}
+```
+
+<b>boards.module.ts</b>
+
+```ts
+import { Module } from '@nestjs/common';
+import { BoardsController } from './boards.controller.js';
+import { BoardsService } from './boards.service.js';
+
+@Module({
+  controllers: [BoardsController],
+  providers: [BoardsService],
+})
+export class BoardsModule {}
+```
+
+이 예제에서 <code>BoardsModule</code>은 <code>AppModule</code>에 import되어 있다고 가정합니다.
+
+요청 처리의 큰 흐름은 다음과 같습니다.
+
+1. 클라이언트가 <code>GET /boards</code> 요청을 보냅니다.
+2. <code>@Controller('boards')</code>와 <code>@Get()</code>에 선언된 경로·HTTP 메서드가 일치해 <code>getBoards()</code> 라우트 핸들러가 실행됩니다.
+3. Controller가 주입받은 <code>BoardsService.getBoards()</code>를 호출합니다.
+4. Service가 게시글 배열을 반환하고, Controller가 그 결과를 반환합니다.
+5. NestJS가 반환값을 HTTP 응답으로 처리하며, 이 예제의 배열은 JSON 응답으로 전달됩니다.
+
+중요한 점은 메서드 이름이 <code>getBoards</code>라서 호출되는 것이 아니라, 데코레이터의 라우팅 정보가 요청과 일치하기 때문에 호출된다는 것입니다.
+
+또한 Module은 요청마다 직접 실행되는 처리 단계가 아닙니다. 애플리케이션을 초기화할 때 Controller와 Provider를 등록하고 의존성을 구성하는 역할을 합니다.
+
+## 6. 의존성 주입(DI)은 왜 필요할까?
+
+Controller에서 <code>new BoardsService()</code>로 직접 객체를 생성하면 Controller가 Service의 생성과 사용을 모두 담당합니다. 반면 생성자로 의존성을 전달받으면 객체를 사용하는 코드와 생성하는 책임을 분리할 수 있습니다.
+
+NestJS에서는 <code>providers: [BoardsService]</code>로 Provider를 등록하고, DI 컨테이너가 필요한 인스턴스를 Controller 생성자에 제공하도록 관리합니다.
+
+DI 자체는 NestJS만의 개념이 아닙니다. 이번 글에서는 기본 원리만 짚고, Provider와 DI의 세부 동작은 다음 편에서 정리하겠습니다.
+
+## 7. 복습 정리
+
+- NestJS는 서버 애플리케이션을 일관된 구조로 개발할 수 있도록 돕는 프레임워크입니다.
+- <code>main.ts</code>는 애플리케이션을 초기화하고 서버를 실행합니다.
+- Module은 관련 Controller와 Provider를 등록하고 의존성을 구성합니다.
+- Controller는 HTTP 요청을 라우트 핸들러에 매핑하고, Service는 비즈니스 로직을 담당하도록 분리할 수 있습니다.
+- DI는 필요한 객체를 직접 생성하는 대신 외부에서 전달받도록 하는 방식입니다.
+
+### 다음 편
+
+<b>NestJS 핵심 구성 요소 — Module, Controller, Provider와 DI</b>를 좀 더 자세히 살펴보겠습니다.
+
+---
+
+참고: [NestJS 공식 문서 — First steps](https://docs.nestjs.com/first-steps) · [Modules](https://docs.nestjs.com/modules) · [Controllers](https://docs.nestjs.com/controllers) · [Providers](https://docs.nestjs.com/providers)
