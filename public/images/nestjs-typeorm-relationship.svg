@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
+<title id="title">TypeORM and PostgreSQL</title>
+<desc id="desc">An entity defines table mappings. A repository uses these mappings through TypeORM to query PostgreSQL via a database driver.</desc>
+<rect width="1200" height="600" rx="20" fill="#111827"/>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+<rect x="45" y="80" width="730" height="445" rx="20" fill="#1f2937" stroke="#fb7185" stroke-width="2"/>
+<text x="410" y="135" fill="#fb7185" font-size="32" font-weight="700">TypeORM</text>
+<rect x="240" y="170" width="340" height="110" rx="14" fill="#374151"/>
+<text x="410" y="215" fill="#fff" font-size="28">Entity</text>
+<text x="410" y="250" fill="#d1d5db" font-size="20">Object ↔ Table mapping</text>
+<path d="M410 285v60m-8-10 8 10 8-10" fill="none" stroke="#9ca3af" stroke-width="3"/>
+<text x="515" y="322" fill="#d1d5db" font-size="18">Mapping metadata</text>
+<rect x="240" y="355" width="340" height="105" rx="14" fill="#e0234e"/>
+<text x="410" y="400" fill="#fff" font-size="28">Repository</text>
+<text x="410" y="435" fill="#fff" font-size="20">Find · Save · Delete</text>
+<path d="M585 407h290m-12-9 12 9-12 9" fill="none" stroke="#9ca3af" stroke-width="3"/>
+<text x="730" y="382" fill="#d1d5db" font-size="18">SQL via driver</text>
+<rect x="885" y="350" width="270" height="115" rx="16" fill="#1f2937" stroke="#60a5fa" stroke-width="2"/>
+<text x="1020" y="402" fill="#fff" font-size="28">PostgreSQL</text>
+<text x="1020" y="438" fill="#d1d5db" font-size="20">Tables &amp; rows</text>
+</g></svg>
