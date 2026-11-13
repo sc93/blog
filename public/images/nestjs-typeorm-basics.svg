@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">NestJS PostgreSQL and TypeORM</title>
+<desc id="desc">Entity → Repository → PostgreSQL</desc>
+<rect width="1200" height="675" fill="#111827"/>
+<circle cx="1110" cy="30" r="300" fill="#e0234e" opacity=".08"/>
+<path d="M80 90h56" stroke="#e0234e" stroke-width="8"/>
+<text x="158" y="104" fill="#f9fafb" font-family="Arial,sans-serif" font-size="40" font-weight="700">NestJS</text>
+<text x="80" y="228" fill="#f9fafb" font-family="Arial,sans-serif" font-size="54" font-weight="700">PostgreSQL &amp; TypeORM</text>
+<text x="80" y="280" fill="#9ca3af" font-family="Arial,sans-serif" font-size="25">BACKEND FUNDAMENTALS · 05</text>
+<rect x="80" y="368" width="310" height="135" rx="18" fill="#1f2937" stroke="#374151" stroke-width="2"/><text x="235" y="447" fill="#f9fafb" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700">Entity</text><path d="M404 435h30m-10-10 10 10-10 10" stroke="#9ca3af" stroke-width="3" fill="none"/>
+<rect x="445" y="368" width="310" height="135" rx="18" fill="#e0234e" stroke="#fb7185" stroke-width="2"/><text x="600" y="447" fill="#f9fafb" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700">Repository</text><path d="M769 435h30m-10-10 10 10-10 10" stroke="#9ca3af" stroke-width="3" fill="none"/>
+<rect x="810" y="368" width="310" height="135" rx="18" fill="#1f2937" stroke="#374151" stroke-width="2"/><text x="965" y="447" fill="#f9fafb" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700">PostgreSQL</text>
+<text x="80" y="601" fill="#6b7280" font-family="Arial,sans-serif" font-size="22">LEARNING NOTES</text>
+</svg>
