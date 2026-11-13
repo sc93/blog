@@ -1,0 +1,140 @@
+---
+title: "NestJS 공부하기 — TypeORM으로 게시글 CRUD 다루기"
+description: 'TypeORM 리포지토리로 게시글을 생성·조회·삭제·수정하며 CRUD 메서드와 비동기 처리, 예외 처리를 복습합니다.'
+date: "2026-11-13"
+time: "14:35:02"
+category: development
+tags: ['NestJS', 'TypeORM', 'PostgreSQL', '백엔드']
+published: true
+thumbnail: '/images/nestjs-typeorm-crud.svg'
+---
+
+오늘은 TypeORM을 사용해 게시글을 생성하고, 조회하고, 삭제하고, 상태를 변경하는 기능을 공부했습니다. 리포지토리의 메서드로 데이터를 다루는 방법과 각 작업에서 확인해야 할 내용을 복습하며 정리해 보겠습니다.
+
+## 1. CRUD란?
+
+CRUD는 데이터를 다루는 네 가지 기본 작업을 뜻합니다.
+
+| 구분   | 의미 | 게시글 기능           | 이번에 사용한 HTTP 메서드 |
+| ------ | ---- | --------------------- | ------------------------- |
+| Create | 생성 | 게시글 작성           | POST                      |
+| Read   | 조회 | 목록·특정 게시글 조회 | GET                       |
+| Update | 수정 | 게시글 상태 변경      | PATCH                     |
+| Delete | 삭제 | 게시글 삭제           | DELETE                    |
+
+TypeORM에서는 리포지토리의 메서드를 통해 이러한 DB 작업을 수행할 수 있습니다. 아래 예제는 DB 연결과 엔티티·리포지토리 등록이 완료된 상태를 전제로 합니다.
+
+## 2. 게시글 생성 — create()와 save()
+
+게시글을 생성할 때는 먼저 엔티티 객체를 만들고 DB에 저장합니다.
+
+```ts
+const board = this.boardRepository.create({
+  title,
+  description,
+  status: BoardStatus.PUBLIC,
+});
+
+await this.boardRepository.save(board);
+```
+
+두 메서드는 이름이 비슷하게 느껴지지만 역할이 다릅니다.
+
+| 메서드     | 역할                                                            |
+| ---------- | --------------------------------------------------------------- |
+| `create()` | 전달받은 값으로 엔티티 인스턴스를 만듭니다.                     |
+| `save()`   | 엔티티를 DB에 저장합니다. 기존 데이터라면 수정할 수도 있습니다. |
+
+**`create()`만 호출하면 DB에 저장되지 않습니다.** 객체를 만드는 작업과 실제 데이터를 저장하는 작업을 구분해야 합니다.
+
+이번 실습에서는 생성 시 상태를 `PUBLIC`으로 지정했습니다. 클라이언트가 보내는 제목·내용과 별개로, 서버에서 초기 상태를 정하는 방식입니다.
+
+## 3. 게시글 조회 — find()와 findOne()
+
+전체 게시글 목록을 조회할 때는 `find()`를 사용합니다.
+
+```ts
+return this.boardRepository.find();
+```
+
+조회 조건을 지정하지 않았으므로 전체 게시글을 배열로 반환합니다. 데이터가 없다면 빈 배열을 받습니다.
+
+특정 ID의 게시글 한 건을 조회할 때는 `findOne()`에 조건을 전달합니다.
+
+```ts
+const board = await this.boardRepository.findOne({
+  where: { id },
+});
+
+if (!board) {
+  throw new NotFoundException(`Board with id ${id} not found`);
+}
+
+return board;
+```
+
+`where: { id }`는 전달받은 ID와 일치하는 데이터를 찾는 조건입니다.
+
+| 메서드      | 조회 대상           | 결과가 없을 때 |
+| ----------- | ------------------- | -------------- |
+| `find()`    | 조건에 맞는 여러 건 | 빈 배열 `[]`   |
+| `findOne()` | 조건에 맞는 한 건   | `null`         |
+
+게시글이 존재하지 않을 수도 있으므로 결과를 확인해야 합니다. 이번 실습에서는 찾는 게시글이 없으면 `NotFoundException`을 발생시켜 404 응답으로 처리했습니다.
+
+목록 조회에서 결과가 없는 것과 특정 게시글이 없는 것은 구분했습니다. 목록은 빈 배열을 반환하고, 특정 게시글은 요청한 대상을 찾지 못했다는 오류를 반환합니다.
+
+## 4. 게시글 삭제 — delete()와 affected
+
+게시글 ID를 조건으로 바로 삭제할 수 있습니다.
+
+```ts
+const result = await this.boardRepository.delete(id);
+
+if (result.affected === 0) {
+  throw new NotFoundException(`Board with id ${id} not found`);
+}
+```
+
+`delete()`의 결과는 삭제된 게시글 객체가 아니라 작업 결과입니다. 이번 코드에서는 `affected`로 삭제된 행 수를 확인합니다. 값이 `0`이면 삭제된 게시글이 없었다는 뜻입니다.
+
+삭제할 게시글이 없다고 해서 `delete()`가 자동으로 404 예외를 발생시키는 것은 아닙니다. 이번 실습에서는 삭제 결과를 확인해 직접 예외를 발생시켰습니다.
+
+## 5. 게시글 상태 변경 — 조회 후 저장
+
+상태 변경은 게시글을 조회하고, 값을 변경한 뒤 저장하는 순서로 처리했습니다.
+
+```ts
+const board = await this.getBoardById(id);
+
+board.status = status;
+await this.boardRepository.save(board);
+
+return board;
+```
+
+`getBoardById()`를 재사용하면 게시글 조회와 존재 여부 확인을 함께 처리할 수 있습니다.
+
+여기서도 객체의 값을 바꾸는 것과 DB에 반영하는 것은 별개입니다.
+
+```ts
+board.status = status;
+```
+
+이 코드는 조회한 객체의 속성을 변경합니다. 이후 `save(board)`를 호출해야 변경 내용을 DB에 반영합니다.
+
+생성할 때 사용한 `save()`를 수정에도 사용할 수 있다는 점을 확인했습니다.
+
+## 6. 기억할 점
+
+DB 작업은 비동기로 처리되며, 리포지토리의 조회·저장 메서드는 `Promise`를 반환합니다. 결과를 확인하거나 다음 작업에 사용해야 할 때는 `await`로 완료를 기다립니다. 결과를 그대로 전달할 때는 Promise를 바로 반환할 수도 있습니다.
+
+이번 CRUD에서 중요한 구분은 **객체 생성·변경과 DB 반영이 서로 다른 작업**이라는 점입니다. 또한 조회나 삭제 대상이 없을 때 어떻게 응답할지는 애플리케이션에서 정해야 합니다.
+
+예제의 전체 목록 조회에는 정렬과 페이지네이션이 없고, 조회 후 수정하는 코드에는 동시 변경 상황을 위한 별도 처리가 없습니다. 이번에는 기본적인 데이터 작업의 의미와 흐름을 이해하는 데 집중했습니다.
+
+### 참고
+
+[TypeORM 공식 문서 — Repository API](https://typeorm.io/docs/working-with-entity-manager/repository-api/)
+
+[NestJS 공식 문서 — Exception filters](https://docs.nestjs.com/exception-filters)
